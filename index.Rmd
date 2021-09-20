@@ -1,38 +1,39 @@
 ---
 title: "Converting Cellular GPS Data into Trips Using R"
 author:
-  - name: Gillian Riches
-    email: martingillian4@gmail.com
-    affiliation: Brigham Young University
-    footnote: 1
-  - name: Gregory Macfarlane
-    email: gregmacfarlane@byu.edu
-    affiliation: Brigham Young University
-
-address:
-  - code: Brigham Young University
-    address: Civil and Environmental Engineering Department, 430 Engineering Building, Provo, Utah 84602
-  - code: Another University
-    address: Some Other Place
-footnote:
-  - code: 1
-    text: "Corresponding Author"
-  - code: 2
-    text: "Present affiliation: some nice job"
+- name: Gillian Riches
+  email: martingillian4@gmail.com
+  affiliation: Brigham Young University
+  footnote: 1
+- name: Gregory Macfarlane
+  email: gregmacfarlane@byu.edu
+  affiliation: Brigham Young University
 date: "`r Sys.Date()`"
+output: pdf_document
+address:
+- code: Brigham Young University
+  address: Civil and Environmental Engineering Department, 430 Engineering Building,
+    Provo, Utah 84602
+- code: Another University
+  address: Some Other Place
 site: bookdown::bookdown_site
 documentclass: article
-journal: "Submitted to Journal"
-bibliography: [book.bib]
+journal: Submitted to Journal
+bibliography: book.bib
 biblio-style: apalike
 link-citations: yes
 abstract: |
   This is where the abstract should go.
-description: "A short description"
-layout: "3p, authoryear"
+description: A short description
+layout: 3p, authoryear
 keywords:
-  - Accessibility
-  - Passive Data
-  - Location Choice
+- Accessibility
+- Passive Data
+- Location Choice
+footnote:
+- code: 1
+  text: Corresponding Author
+- code: 2
+  text: 'Present affiliation: some nice job'
 ---
 
