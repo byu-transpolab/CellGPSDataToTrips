@@ -23,6 +23,7 @@ library(mlogit)
 options(knitr.kable.NA = '') 
 # tells kableExtra to not load latex table packages in the chunk output
 options(kableExtra.latex.load_packages = FALSE) 
+options(modelsummary_format_numeric_latex = "plain")
 
 # round and format numbers that get printed in the text of the article.
 inline_hook <- function(x) {

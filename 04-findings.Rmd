@@ -13,7 +13,7 @@ models <- list("Model 1" = model1, "Model 2" = model2)
 ```
 
 
-```{r estimation-results}
+```{r estimation-results, eval=FALSE, include=FALSE}
 modelsummary(models, estimate = "{estimate} ({statistic})",
              title = "Model Estimation Results")
 ```

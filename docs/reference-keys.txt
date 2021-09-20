@@ -1,6 +1,5 @@
 tab:datasummary
 eq:mnl
-tab:estimation-results
 question
 methods
 data
