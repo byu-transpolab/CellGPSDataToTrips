@@ -1,4 +1,4 @@
-# CE 594R Project
+# Converting GPS data into trips using R
 
 ## Author: Gillian Riches
 
