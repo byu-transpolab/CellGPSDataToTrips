@@ -1,0 +1,214 @@
+\documentclass[3p, authoryear]{elsarticle} %review=doublespace preprint=single 5p=2 column
+%%% Begin My package additions %%%%%%%%%%%%%%%%%%%
+\usepackage[hyphens]{url}
+
+  \journal{Submitted to Journal} % Sets Journal name
+
+
+\usepackage{lineno} % add
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+\usepackage{graphicx}
+%%%%%%%%%%%%%%%% end my additions to header
+
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \usepackage{fontspec}
+  \ifxetex
+    \usepackage{xltxtra,xunicode}
+  \fi
+  \defaultfontfeatures{Mapping=tex-text,Scale=MatchLowercase}
+  \newcommand{\euro}{€}
+\fi
+% use microtype if available
+\IfFileExists{microtype.sty}{\usepackage{microtype}}{}
+\usepackage{natbib}
+\bibliographystyle{apalike}
+\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\ifxetex
+  \usepackage[setpagesize=false, % page size defined by xetex
+              unicode=false, % unicode breaks when used with xetex
+              xetex]{hyperref}
+\else
+  \usepackage[unicode=true]{hyperref}
+\fi
+\hypersetup{breaklinks=true,
+            bookmarks=true,
+            pdfauthor={},
+            pdftitle={Converting Cellular GPS Data into Trips Using R},
+            colorlinks=false,
+            urlcolor=blue,
+            linkcolor=magenta,
+            pdfborder={0 0 0}}
+\urlstyle{same}  % don't use monospace font for urls
+
+\setcounter{secnumdepth}{5}
+% Pandoc toggle for numbering sections (defaults to be off)
+
+% Pandoc citation processing
+
+% Pandoc header
+\usepackage{booktabs}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{colortbl}
+\usepackage{pdflscape}
+\usepackage{tabu}
+\usepackage{threeparttable}
+\usepackage{threeparttablex}
+\usepackage[normalem]{ulem}
+\usepackage{makecell}
+\usepackage{xcolor}
+
+
+
+\begin{document}
+\begin{frontmatter}
+
+  \title{Converting Cellular GPS Data into Trips Using R}
+    \author[Brigham Young University]{Gillian Riches\corref{1}}
+   \ead{martingillian4@gmail.com} 
+    \author[Brigham Young University]{Gregory Macfarlane\corref{2}}
+   \ead{gregmacfarlane@byu.edu} 
+      \address[Brigham Young University]{Civil and Environmental Engineering Department, 232 Engineering Building, Provo, Utah 84602}
+      \cortext[1]{Corresponding Author}
+    \cortext[2]{Present affiliation: Committee Chair}
+  
+  \begin{abstract}
+  This is where the abstract should go.
+  \end{abstract}
+   \begin{keyword} GPS Data, Trips, Clusters\end{keyword}
+ \end{frontmatter}
+
+\hypertarget{question}{%
+\section{Question}\label{question}}
+
+Global Positioning System (GPS) surveys have become a more accurate and reputable alternative to previous travel survey methods that collect activity-travel patterns. Despite GPS devices ability to record time and positional characteristics, they still require processing in order to convert the positional characteristics into trip purposes and activities.
+
+The first step of this conversion process is cleaning the GPS data to produce trips. Currently, most researchers use subjective time and speed rule-based algorithms to perform this task \citep{reviewOfMethods2014}. Due to their ambiguity, using these rules is not ideal. For example, some people walk slower than others, so the speed threshold would require constant manual changing. Another issue with these rules is that every researcher must have their own definition of a trip. One researcher who considers picking somebody up to be its own activity will have a significantly smaller time threshold. Due to GPS data imputation being applied in these different contexts, accuracy ranges from 43\% to 61\% \citep{reviewOfMethods2014}.
+
+The newest and second most common method is cluster-based: the density of GPS points within a predefined radius determines an activity. The radius and point density would not vary from person to person thus providing increased efficiency and precision. In fact, one experiment using a DBSCAN cluster-based algorithms proved to be 92\% precise \citep{DBAlgorithm2017}. Despite this impressive precision, three main gaps still remain: survey collection typically doesn't exceed two weeks \citep{comparisonOfAlgorithms2016}, not all activities are accounted for in analysis, and this algorithm has not been published in R. Usually, researchers group all of the \emph{Other} trip purposes into one category and analyze it as a whole \citep{whereYouAt2019}.
+
+Therefore, the question I am answering is: \emph{How does one write a cluster-based algorithm in R that accurately transforms 6+ months worth of GPS survey data into trips and analyze the ``Other'' trip purposes as separate activities?} The respondents' GPS data used in my code is associated with their responses to mental health surveys, so they are not publicly available. However, they will be generally described in the Methods section.
+
+\hypertarget{methods}{%
+\section{Methods}\label{methods}}
+
+In this chapter, you describe the approach you have taken on the problem. This
+usually involves a discussion about both the data you used and the models you
+applied.
+
+\hypertarget{data}{%
+\subsection{Data}\label{data}}
+
+Discuss where you got your data, how you cleaned it, any assumptions you made.
+
+Often there will be a table describing summary statistics of your dataset.
+Table \ref{tab:datasummary} shows a nice table using the \href{https://vincentarelbundock.github.io/modelsummary/articles/datasummary.html}{\texttt{datasummary}}
+functions in the \texttt{modelsummary} package.
+
+\begin{table}
+
+\caption{\label{tab:datasummary}Descriptive Statistics of Dataset}
+\centering
+\begin{tabular}[t]{llrrrrrrrrrrrr}
+\toprule
+\multicolumn{2}{c}{ } & \multicolumn{2}{c}{regcar (N=10930)} & \multicolumn{2}{c}{sportuv (N=1048)} & \multicolumn{2}{c}{sportcar (N=880)} & \multicolumn{2}{c}{stwagon (N=4446)} & \multicolumn{2}{c}{truck (N=5628)} & \multicolumn{2}{c}{van (N=4992)} \\
+\cmidrule(l{3pt}r{3pt}){3-4} \cmidrule(l{3pt}r{3pt}){5-6} \cmidrule(l{3pt}r{3pt}){7-8} \cmidrule(l{3pt}r{3pt}){9-10} \cmidrule(l{3pt}r{3pt}){11-12} \cmidrule(l{3pt}r{3pt}){13-14}
+  &    & Mean & Std. Dev. & Mean  & Std. Dev.  & Mean   & Std. Dev.   & Mean    & Std. Dev.    & Mean     & Std. Dev.     & Mean      & Std. Dev.     \\
+\midrule
+price &  & 4.2 & 1.9 & 4.7 & 1.9 & 4.8 & 2.2 & 4.1 & 1.9 & 4.2 & 2.0 & 4.2 & 1.9\\
+range &  & 237.2 & 94.5 & 241.6 & 94.7 & 233.6 & 96.7 & 238.7 & 94.3 & 238.2 & 93.1 & 236.8 & 94.7\\
+size &  & 2.4 & 0.8 & 2.1 & 1.0 & 1.4 & 1.0 & 2.3 & 0.8 & 2.4 & 0.8 & 2.5 & 0.7\\
+\midrule
+ &  & N & Pct. & N & Pct. & N & Pct. & N & Pct. & N & Pct. & N & Pct.\\
+fuel & gasoline & 2704 & 24.7 & 280 & 26.7 & 218 & 24.8 & 1096 & 24.7 & 1413 & 25.1 & 1247 & 25.0\\
+ & methanol & 2729 & 25.0 & 246 & 23.5 & 225 & 25.6 & 1091 & 24.5 & 1445 & 25.7 & 1216 & 24.4\\
+ & cng & 2767 & 25.3 & 260 & 24.8 & 238 & 27.0 & 1109 & 24.9 & 1360 & 24.2 & 1282 & 25.7\\
+ & electric & 2730 & 25.0 & 262 & 25.0 & 199 & 22.6 & 1150 & 25.9 & 1410 & 25.1 & 1247 & 25.0\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\hypertarget{models}{%
+\subsection{Models}\label{models}}
+
+If your work is mostly a new model, you probably will have introduced some
+details in the literature review. But this is where you describe the
+mathematical construction of your model, the variables it uses, and other
+things. Some methods are so common (linear regression) that it is unnecessary to
+explore them in detail. But others will need to be described, often with
+mathematics. For example, the probability of a multinomial logit model is
+
+\begin{equation}
+  P_i(X_{in}) = \frac{e^{X_{in}\beta_i}}{\sum_{j \in J}e^{X_{jn}\beta_j}}
+  \label{eq:mnl}
+\end{equation}
+
+Use \href{https://www.overleaf.com/learn/latex/mathematical_expressions}{LaTeX mathematics}.
+You'll want to number display equations so that you can
+refer to them later in the manuscript. Other simpler math can be described inline,
+like saying that \(i, j \in J\). Details on using equations in bookdown are available
+\href{https://bookdown.org/yihui/bookdown/markdown-extensions-by-bookdown.html}{here}.
+
+\hypertarget{findings}{%
+\section{Findings}\label{findings}}
+
+This section might be called ``Results'' instead of ``Applications,'' depending
+on what it is that you are working on. But you'll probably say something like
+``The initial model estimation results are given in Table \ref{tab:estimation-results}.''
+That table is created with the \texttt{modelsummary()} package and function.
+
+With those results presented, you can go into a discussion of what they mean.
+first, discuss the actual results that are shown in the table, and then any
+interesting or unintuitive observations.
+
+\hypertarget{additional-analysis}{%
+\subsection{Additional Analysis}\label{additional-analysis}}
+
+Usually, it is good to use your model for something.
+
+\begin{itemize}
+\tightlist
+\item
+  Hypothetical policy analysis
+\item
+  Statistical validation effort
+\item
+  Equity or impact analysis
+\end{itemize}
+
+If the analysis is substantial, it might become its own top-level section.
+
+\hypertarget{acknowledgements}{%
+\section*{Acknowledgements}\label{acknowledgements}}
+\addcontentsline{toc}{section}{Acknowledgements}
+
+This is where you will put your acknowledgments
+
+\bibliography{book.bib}
+
+
+\end{document}
