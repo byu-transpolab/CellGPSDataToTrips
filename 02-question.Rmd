@@ -1,20 +1,10 @@
 # Question
 
-Here is a review of existing methods.  Use the `bookdown` [@xie2015] package
-referencing system to make it easy on yourself.
+Global Positioning System (GPS) surveys have become a more accurate and reputable alternative to previous travel survey methods that collect activity-travel patterns. Despite GPS devices ability to record time and positional characteristics, they still require processing in order to convert the positional characteristics into trip purposes and activities. 
 
-The literature review is not simply a "review" or a list of what has been 
-done in the past. This needs to a thoughtful synthesis that accomplishes two
-things:
+The first step of this conversion process is cleaning the GPS data to produce trips. Currently, most researchers use subjective time and speed rule-based algorithms to perform this task [@reviewOfMethods2014]. Due to their ambiguity, using these rules is not ideal. For example, some people walk slower than others, so the speed threshold would require constant manual changing. Another issue with these rules is that every researcher must have their own definition of a trip. One researcher who considers picking somebody up to be its own activity will have a significantly smaller time threshold. Due to GPS data imputation being applied in these different contexts, accuracy ranges from 43% to 61% [@reviewOfMethods2014]. 
 
-  - Shows that you understand the previous efforts that other people have
-    made on this problem.
-  - Identifies the limitation or the gap in those previous efforts. 
-  
-You will have already mentioned this gap in the introduction, but here you need
-to build a solid case for why what you are doing is a meaningful contribution.
-    
-Literature reviews do not have a specific guidelines for length or number of
-citations. It's more about making a rhetorical argument; if it's a new problem
-then the review can be shorter. But you'll need to refer to previous attempts at
-the problem, the methods you are trying, and other things.
+The newest and second most common method is cluster-based: the density of GPS points within a predefined radius determines an activity. The radius and point density would not vary from person to person thus providing increased efficiency and precision. In fact, one experiment using a DBSCAN cluster-based algorithms proved to be 92% precise [@DBAlgorithm2017]. Despite this impressive precision, three main gaps still remain: survey collection typically doesn't exceed two weeks [@comparisonOfAlgorithms2016], not all activities are accounted for in analysis, and this algorithm has not been published in R. Usually, researchers group all of the *Other* trip purposes into one category and analyze it as a whole [@whereYouAt2019].
+
+Therefore, the question I am answering is: *How does one write a cluster-based algorithm in R that accurately transforms 6+ months worth of GPS survey data into trips and analyze the "Other" trip purposes as separate activities?* The respondents' GPS data used in my code is associated with their responses to mental health surveys, so they are not publicly available. However, they will be generally described in the Methods section.
+
