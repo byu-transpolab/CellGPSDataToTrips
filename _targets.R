@@ -1,5 +1,4 @@
 library(targets)
-library(tarchetypes)
 # This is an example _targets.R file. Every
 # {targets} pipeline needs one.
 # Use tar_script() to create _targets.R and tar_edit()
@@ -7,32 +6,24 @@ library(tarchetypes)
 # Then, run tar_make() to run the pipeline
 # and tar_read(summary) to view the results.
 
-# Set target-specific options such as packages.
-tar_option_set(packages = c("tidyverse", "bookdown"))
-
 # Define custom functions and other global objects.
 # This is where you write source(\"R/functions.R\")
 # if you keep your functions in external scripts.
-source("R/functions.R")
+
+source("R/gps2trips.R")
+source("R/MakeMaps.R")
+
+#files_in_folder <- list.files("data")
 
 
-# Targets necessary to build your data and run your model
-data_targets <- list(
-  tar_target(data, data.frame(x = sample.int(100), y = sample.int(100))),
-  tar_target(summary, summ(data)) # Call your custom functions as needed.
-)
+# Set target-specific options such as packages.
+tar_option_set(packages = c("dplyr","hms", "lubridate", "tidyverse", "leaflet", "sf", "gpsactivs"))
 
-
-
-# Targets necessary to build the book / article
-book_targets <- list(
-  tar_target(report, rmarkdown::)
-)
-
-
-
-# run all targets
+# End this file with a list of target objects.
 list(
-  data_targets, 
-  book_targets
+  tar_target(caps, makeCaps("data")),
+  tar_target(clusters_per_date,caps_tr(caps)),
+  tar_target(raw_data_maps, makeRawDataMaps(clusters_per_date)),
+  tar_target(cluster_maps, makeClusterMaps(clusters_per_date))
 )
+

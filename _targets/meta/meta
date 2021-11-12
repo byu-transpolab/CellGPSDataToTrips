@@ -1,0 +1,13 @@
+name|type|data|command|depend|seed|path|time|size|bytes|format|iteration|parent|children|seconds|warnings|error
+files_in_folder|object|c8c743d0c399db13||||||||||||||
+caps|stem|b4c1d7de7e2621f4|323c7447262e3f56|653b61164c523348|-104144508||t18943.2240817931s|70705e41e8fd195b|862479|rds|vector|||3.79|package sf was built under R version 4.0.5|
+clusters_per_date|stem|01cd3c47f92450f0|edeadd3723cc8fab|6d774d28e4a160a6|555922513||t18943.2243304929s|a8f614f6060d9f1a|439080|rds|vector|||21.26|no nonmissing arguments to max returning Inf|
+cluster_maps|stem|6cfa48b28c809697|c187ace58a727506|cf25f77049e05e22|416852581||t18943.2330234307s|7bb24a33923bb0f9|7571949|rds|vector|||0.41|package sf was built under R version 4.0.5|
+makeRawDataMaps|function|d7fc15fa01861234||||||||||||||
+makeClusterMaps|function|3c3bb10e3e1f83b0||||||||||||||
+yesterday|function|bd99f1f904cb5a87||||||||||||||
+make_clusters|function|a75f69eb88938447||||||||||||||
+make_sf|function|6454a97ea89ec736||||||||||||||
+makeCaps|function|0e4b6bd1700e5574||||||||||||||
+caps_tr|function|52ff7ef9d0b85267||||||||||||||
+raw_data_maps|stem|9e52b3fb0aa08d21|2f272d6a91b49072|e3d4488aa8089211|-1837020871||t18943.2352703007s|1a5601b66fcf6fe6|7566257|rds|vector|||0.4|package sf was built under R version 4.0.5|
