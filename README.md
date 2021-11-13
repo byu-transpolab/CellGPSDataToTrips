@@ -19,3 +19,9 @@ website, the PDF version can easily be submitted to academic journals, and I wil
 now have a good basis for when I begin writing my entire thesis. To reiterate, this
 project is a very consolidated and shortened version of my research; my thesis is going
 to be much more in depth.
+
+In order to get the targets, you must put the data files you want to analyze in its own folder
+in the R Project. As of right now, the files cannot be zipped. Make sure that this folder 
+is named "data". Once you have the "data" folder in the R Project, load the targets 
+library and then tar_make(). The names of the targets are in the targets.R file. Simply 
+run tar_load(name_of_target) to see these targets you just made.
