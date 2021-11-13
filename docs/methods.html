@@ -4,11 +4,11 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title> 2 Methods | Converting Cellular GPS Data into Trips Using R</title>
+  <title> 2 Methods | My Maps</title>
   <meta name="description" content="A short description" />
   <meta name="generator" content="bookdown 0.24 and GitBook 2.6.7" />
 
-  <meta property="og:title" content=" 2 Methods | Converting Cellular GPS Data into Trips Using R" />
+  <meta property="og:title" content=" 2 Methods | My Maps" />
   <meta property="og:type" content="book" />
   
   
@@ -16,14 +16,14 @@
   
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content=" 2 Methods | Converting Cellular GPS Data into Trips Using R" />
+  <meta name="twitter:title" content=" 2 Methods | My Maps" />
   
   <meta name="twitter:description" content="A short description" />
   
 
 
 
-<meta name="date" content="2021-11-11" />
+<meta name="date" content="2021-11-12" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -194,7 +194,7 @@ div.csl-indent {
       <div class="body-inner">
         <div class="book-header" role="navigation">
           <h1>
-            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Converting Cellular GPS Data into Trips Using R</a>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">My Maps</a>
           </h1>
         </div>
 
@@ -204,451 +204,305 @@ div.csl-indent {
             <section class="normal" id="section-">
 <div id="methods" class="section level1" number="2">
 <h1><span class="header-section-number"> 2</span> Methods</h1>
-<p>In this chapter, you describe the approach you have taken on the problem. This
-usually involves a discussion about both the data you used and the models you
-applied.</p>
 <div id="data" class="section level2" number="2.1">
 <h2><span class="header-section-number">2.1</span> Data</h2>
-<p>Discuss where you got your data, how you cleaned it, any assumptions you made.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="methods.html#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;Car&quot;</span>, <span class="at">package =</span> <span class="st">&quot;mlogit&quot;</span>)</span>
-<span id="cb1-2"><a href="methods.html#cb1-2" aria-hidden="true" tabindex="-1"></a>car_mlogit <span class="ot">&lt;-</span> Car <span class="sc">%&gt;%</span></span>
-<span id="cb1-3"><a href="methods.html#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">choice =</span> <span class="fu">gsub</span>(<span class="st">&quot;choice&quot;</span>, <span class="st">&quot;&quot;</span>, choice)) <span class="sc">%&gt;%</span></span>
-<span id="cb1-4"><a href="methods.html#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dfidx</span>( <span class="at">varying =</span> <span class="dv">5</span><span class="sc">:</span><span class="dv">70</span>, <span class="at">shape =</span> <span class="st">&quot;wide&quot;</span>, <span class="at">choice =</span> <span class="st">&quot;choice&quot;</span>, <span class="at">sep =</span> <span class="st">&quot;&quot;</span>)</span></code></pre></div>
-<p>Often there will be a table describing summary statistics of your dataset.
-Table <a href="methods.html#tab:datasummary">2.1</a> shows a nice table using the <a href="https://vincentarelbundock.github.io/modelsummary/articles/datasummary.html"><code>datasummary</code></a>
-functions in the <code>modelsummary</code> package.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="methods.html#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">datasummary_balance</span>(</span>
-<span id="cb2-2"><a href="methods.html#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="sc">~</span>type, </span>
-<span id="cb2-3"><a href="methods.html#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> car_mlogit <span class="sc">%&gt;%</span> </span>
-<span id="cb2-4"><a href="methods.html#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(type, fuel, price, range, size), </span>
-<span id="cb2-5"><a href="methods.html#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">dinm =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb2-6"><a href="methods.html#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">title =</span> <span class="st">&quot;Descriptive Statistics of Dataset&quot;</span></span>
-<span id="cb2-7"><a href="methods.html#cb2-7" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div>
+<p>The GPS data used to determine the minPts and eps parameters come from 60 volunteers in
+the Utah County area and were taken over a period of six or more months depending on the person. An example of what the raw GPS data looked like is shown in Figure 2.1.</p>
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <caption>
-<span id="tab:datasummary">Table 2.1: </span>Descriptive Statistics of Dataset
+<span id="tab:Figure1">Table 2.1: </span>Raw GPS Data
 </caption>
 <thead>
 <tr>
-<th style="empty-cells: hide;border-bottom:hidden;" colspan="2">
+<th style="text-align:right;">
+accuracy
 </th>
-<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2">
-<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
-regcar (N=10930)
-</div>
+<th style="text-align:left;">
+timestamp
 </th>
-<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2">
-<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
-sportuv (N=1048)
-</div>
+<th style="text-align:right;">
+speed
 </th>
-<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2">
-<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
-sportcar (N=880)
-</div>
+<th style="text-align:right;">
+lat
 </th>
-<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2">
-<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
-stwagon (N=4446)
-</div>
+<th style="text-align:right;">
+lon
 </th>
-<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2">
-<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
-truck (N=5628)
-</div>
-</th>
-<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2">
-<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
-van (N=4992)
-</div>
+<th style="text-align:right;">
+time
 </th>
 </tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:left;">
+2021-03-17 22:59:36
+</td>
+<td style="text-align:right;">
+-1
+</td>
+<td style="text-align:right;">
+40.25293
+</td>
+<td style="text-align:right;">
+-111.6602
+</td>
+<td style="text-align:right;">
+1.616044e+12
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:left;">
+2021-03-17 22:59:37
+</td>
+<td style="text-align:right;">
+-1
+</td>
+<td style="text-align:right;">
+40.25293
+</td>
+<td style="text-align:right;">
+-111.6602
+</td>
+<td style="text-align:right;">
+1.616044e+12
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:left;">
+2021-03-17 22:59:38
+</td>
+<td style="text-align:right;">
+-1
+</td>
+<td style="text-align:right;">
+40.25293
+</td>
+<td style="text-align:right;">
+-111.6602
+</td>
+<td style="text-align:right;">
+1.616044e+12
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:left;">
+2021-03-17 22:59:39
+</td>
+<td style="text-align:right;">
+-1
+</td>
+<td style="text-align:right;">
+40.25293
+</td>
+<td style="text-align:right;">
+-111.6602
+</td>
+<td style="text-align:right;">
+1.616044e+12
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:left;">
+2021-03-17 22:59:40
+</td>
+<td style="text-align:right;">
+-1
+</td>
+<td style="text-align:right;">
+40.25293
+</td>
+<td style="text-align:right;">
+-111.6602
+</td>
+<td style="text-align:right;">
+1.616044e+12
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:left;">
+2021-03-17 22:59:41
+</td>
+<td style="text-align:right;">
+-1
+</td>
+<td style="text-align:right;">
+40.25293
+</td>
+<td style="text-align:right;">
+-111.6602
+</td>
+<td style="text-align:right;">
+1.616044e+12
+</td>
+</tr>
+</tbody>
+</table>
+<p>Before the GPS data can be processed, it had to be cleaned and reformatted. Since a DBSCAN algorithm is being used, the speed variable was removed completely. From there, the dates and times had to be reformatted using functions from the <strong>lubridate</strong> package in R and by writing a “Yesterday” function that defines days as being from 3 AM to 3 AM instead of 12 AM to 12 AM. This was done because large amount of the demographic is college students, and they are likely to make trips after midnight. Table 2.2 shows what the cleaned data looked like.</p>
+<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+<span id="tab:Figure2">Table 2.2: </span>Cleaned GPS Data
+</caption>
+<thead>
 <tr>
 <th style="text-align:left;">
+id
+</th>
+<th style="text-align:right;">
+lat
+</th>
+<th style="text-align:right;">
+lon
 </th>
 <th style="text-align:left;">
+timestamp
 </th>
-<th style="text-align:right;">
-Mean
+<th style="text-align:left;">
+date
 </th>
-<th style="text-align:right;">
-Std. Dev.
-</th>
-<th style="text-align:right;">
-Mean
-</th>
-<th style="text-align:right;">
-Std. Dev.
-</th>
-<th style="text-align:right;">
-Mean
-</th>
-<th style="text-align:right;">
-Std. Dev.
-</th>
-<th style="text-align:right;">
-Mean
-</th>
-<th style="text-align:right;">
-Std. Dev.
-</th>
-<th style="text-align:right;">
-Mean
-</th>
-<th style="text-align:right;">
-Std. Dev.
-</th>
-<th style="text-align:right;">
-Mean
-</th>
-<th style="text-align:right;">
-Std. Dev.
+<th style="text-align:left;">
+time
 </th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td style="text-align:left;">
-price
+5f5184e73e2fd848eac22aec
+</td>
+<td style="text-align:right;">
+40.25293
+</td>
+<td style="text-align:right;">
+-111.6602
 </td>
 <td style="text-align:left;">
+2021-03-17 22:59:36
 </td>
-<td style="text-align:right;">
-4.2
+<td style="text-align:left;">
+2021-03-17
 </td>
-<td style="text-align:right;">
-1.9
-</td>
-<td style="text-align:right;">
-4.7
-</td>
-<td style="text-align:right;">
-1.9
-</td>
-<td style="text-align:right;">
-4.8
-</td>
-<td style="text-align:right;">
-2.2
-</td>
-<td style="text-align:right;">
-4.1
-</td>
-<td style="text-align:right;">
-1.9
-</td>
-<td style="text-align:right;">
-4.2
-</td>
-<td style="text-align:right;">
-2.0
-</td>
-<td style="text-align:right;">
-4.2
-</td>
-<td style="text-align:right;">
-1.9
+<td style="text-align:left;">
+22:59:36
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-range
+5f5184e73e2fd848eac22aec
+</td>
+<td style="text-align:right;">
+40.25293
+</td>
+<td style="text-align:right;">
+-111.6602
 </td>
 <td style="text-align:left;">
+2021-03-17 22:59:37
 </td>
-<td style="text-align:right;">
-237.2
+<td style="text-align:left;">
+2021-03-17
 </td>
-<td style="text-align:right;">
-94.5
-</td>
-<td style="text-align:right;">
-241.6
-</td>
-<td style="text-align:right;">
-94.7
-</td>
-<td style="text-align:right;">
-233.6
-</td>
-<td style="text-align:right;">
-96.7
-</td>
-<td style="text-align:right;">
-238.7
-</td>
-<td style="text-align:right;">
-94.3
-</td>
-<td style="text-align:right;">
-238.2
-</td>
-<td style="text-align:right;">
-93.1
-</td>
-<td style="text-align:right;">
-236.8
-</td>
-<td style="text-align:right;">
-94.7
-</td>
-</tr>
-<tr>
-<td style="text-align:left;box-shadow: 0px 1px">
-size
-</td>
-<td style="text-align:left;box-shadow: 0px 1px">
-</td>
-<td style="text-align:right;box-shadow: 0px 1px">
-2.4
-</td>
-<td style="text-align:right;box-shadow: 0px 1px">
-0.8
-</td>
-<td style="text-align:right;box-shadow: 0px 1px">
-2.1
-</td>
-<td style="text-align:right;box-shadow: 0px 1px">
-1.0
-</td>
-<td style="text-align:right;box-shadow: 0px 1px">
-1.4
-</td>
-<td style="text-align:right;box-shadow: 0px 1px">
-1.0
-</td>
-<td style="text-align:right;box-shadow: 0px 1px">
-2.3
-</td>
-<td style="text-align:right;box-shadow: 0px 1px">
-0.8
-</td>
-<td style="text-align:right;box-shadow: 0px 1px">
-2.4
-</td>
-<td style="text-align:right;box-shadow: 0px 1px">
-0.8
-</td>
-<td style="text-align:right;box-shadow: 0px 1px">
-2.5
-</td>
-<td style="text-align:right;box-shadow: 0px 1px">
-0.7
+<td style="text-align:left;">
+22:59:37
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
+5f5184e73e2fd848eac22aec
+</td>
+<td style="text-align:right;">
+40.25293
+</td>
+<td style="text-align:right;">
+-111.6602
 </td>
 <td style="text-align:left;">
+2021-03-17 22:59:38
 </td>
-<td style="text-align:right;">
-N
+<td style="text-align:left;">
+2021-03-17
 </td>
-<td style="text-align:right;">
-Pct.
-</td>
-<td style="text-align:right;">
-N
-</td>
-<td style="text-align:right;">
-Pct.
-</td>
-<td style="text-align:right;">
-N
-</td>
-<td style="text-align:right;">
-Pct.
-</td>
-<td style="text-align:right;">
-N
-</td>
-<td style="text-align:right;">
-Pct.
-</td>
-<td style="text-align:right;">
-N
-</td>
-<td style="text-align:right;">
-Pct.
-</td>
-<td style="text-align:right;">
-N
-</td>
-<td style="text-align:right;">
-Pct.
+<td style="text-align:left;">
+22:59:38
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-fuel
+5f5184e73e2fd848eac22aec
+</td>
+<td style="text-align:right;">
+40.25293
+</td>
+<td style="text-align:right;">
+-111.6602
 </td>
 <td style="text-align:left;">
-gasoline
+2021-03-17 22:59:39
 </td>
-<td style="text-align:right;">
-2704
+<td style="text-align:left;">
+2021-03-17
 </td>
-<td style="text-align:right;">
-24.7
-</td>
-<td style="text-align:right;">
-280
-</td>
-<td style="text-align:right;">
-26.7
-</td>
-<td style="text-align:right;">
-218
-</td>
-<td style="text-align:right;">
-24.8
-</td>
-<td style="text-align:right;">
-1096
-</td>
-<td style="text-align:right;">
-24.7
-</td>
-<td style="text-align:right;">
-1413
-</td>
-<td style="text-align:right;">
-25.1
-</td>
-<td style="text-align:right;">
-1247
-</td>
-<td style="text-align:right;">
-25.0
+<td style="text-align:left;">
+22:59:39
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
+5f5184e73e2fd848eac22aec
+</td>
+<td style="text-align:right;">
+40.25293
+</td>
+<td style="text-align:right;">
+-111.6602
 </td>
 <td style="text-align:left;">
-methanol
+2021-03-17 22:59:40
 </td>
-<td style="text-align:right;">
-2729
+<td style="text-align:left;">
+2021-03-17
 </td>
-<td style="text-align:right;">
-25.0
-</td>
-<td style="text-align:right;">
-246
-</td>
-<td style="text-align:right;">
-23.5
-</td>
-<td style="text-align:right;">
-225
-</td>
-<td style="text-align:right;">
-25.6
-</td>
-<td style="text-align:right;">
-1091
-</td>
-<td style="text-align:right;">
-24.5
-</td>
-<td style="text-align:right;">
-1445
-</td>
-<td style="text-align:right;">
-25.7
-</td>
-<td style="text-align:right;">
-1216
-</td>
-<td style="text-align:right;">
-24.4
+<td style="text-align:left;">
+22:59:40
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
+5f5184e73e2fd848eac22aec
+</td>
+<td style="text-align:right;">
+40.25293
+</td>
+<td style="text-align:right;">
+-111.6602
 </td>
 <td style="text-align:left;">
-cng
-</td>
-<td style="text-align:right;">
-2767
-</td>
-<td style="text-align:right;">
-25.3
-</td>
-<td style="text-align:right;">
-260
-</td>
-<td style="text-align:right;">
-24.8
-</td>
-<td style="text-align:right;">
-238
-</td>
-<td style="text-align:right;">
-27.0
-</td>
-<td style="text-align:right;">
-1109
-</td>
-<td style="text-align:right;">
-24.9
-</td>
-<td style="text-align:right;">
-1360
-</td>
-<td style="text-align:right;">
-24.2
-</td>
-<td style="text-align:right;">
-1282
-</td>
-<td style="text-align:right;">
-25.7
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
+2021-03-17 22:59:41
 </td>
 <td style="text-align:left;">
-electric
+2021-03-17
 </td>
-<td style="text-align:right;">
-2730
-</td>
-<td style="text-align:right;">
-25.0
-</td>
-<td style="text-align:right;">
-262
-</td>
-<td style="text-align:right;">
-25.0
-</td>
-<td style="text-align:right;">
-199
-</td>
-<td style="text-align:right;">
-22.6
-</td>
-<td style="text-align:right;">
-1150
-</td>
-<td style="text-align:right;">
-25.9
-</td>
-<td style="text-align:right;">
-1410
-</td>
-<td style="text-align:right;">
-25.1
-</td>
-<td style="text-align:right;">
-1247
-</td>
-<td style="text-align:right;">
-25.0
+<td style="text-align:left;">
+22:59:41
 </td>
 </tr>
 </tbody>
@@ -656,22 +510,19 @@ electric
 </div>
 <div id="models" class="section level2" number="2.2">
 <h2><span class="header-section-number">2.2</span> Models</h2>
-<p>If your work is mostly a new model, you probably will have introduced some
-details in the literature review. But this is where you describe the
-mathematical construction of your model, the variables it uses, and other
-things. Some methods are so common (linear regression) that it is unnecessary to
-explore them in detail. But others will need to be described, often with
-mathematics. For example, the probability of a multinomial logit model is</p>
-<p><span class="math display" id="eq:mnl">\[\begin{equation}
-  P_i(X_{in}) = \frac{e^{X_{in}\beta_i}}{\sum_{j \in J}e^{X_{jn}\beta_j}}
-  \tag{2.1}
+<p>Once the data is cleaned and properly formatted, it is run through a DBSCAN algorithm largely based on the method done by Gong et al. in 2018 <span class="citation">(<a href="#ref-GongInspiration" role="doc-biblioref">Gong L. 2018</a>)</span>. This is where the eps and MinPts parameters will be chosen. After the DBSCAN algorithm determines how many clusters there are, they get split based on the time between consecutive points. This is to remove any error that comes from when a person makes two trips to the same place in one day (Ex. Home). Now, that cluster counts as two separate clusters if the time difference between the clusters is large enough.</p>
+<p>Finally, there is an entropy calculation step where entropy is determined by the change in departure angle between consecutive points. The equation for this entropy is shown in the equation below <span class="citation">(<a href="#ref-GongInspiration" role="doc-biblioref">Gong L. 2018</a>)</span>. If the points are in a line, the person is likely at a stoplight and the entropy is very low. Implementing this entropy equation also removes the need for any subjective time or speed rules. For the purposes of this question, the entropy constraint will always be set to 0.5. The only changing parameters will be MinPts and eps.</p>
+<p><span class="math display">\[\begin{equation}
+  EI_q = -\sum_{d=1}^D ((\frac{n_d}{N})ln(\frac{n_d}{N}))
 \end{equation}\]</span></p>
-<p>Use <a href="https://www.overleaf.com/learn/latex/mathematical_expressions">LaTeX mathematics</a>.
-You’ll want to number display equations so that you can
-refer to them later in the manuscript. Other simpler math can be described inline,
-like saying that <span class="math inline">\(i, j \in J\)</span>. Details on using equations in bookdown are available
-<a href="https://bookdown.org/yihui/bookdown/markdown-extensions-by-bookdown.html">here</a>.</p>
+<p>The resulting clusters from this DBSCAN and entropy hybrid model are displayed in maps using R. For this experiment, I will look at a map of the cleaned data and determine how many clusters it looks like there is. Then, the data goes through the model and the calculated number of clusters is compared to how many I saw originally. I repeated this 5 times over 10 days in order to determine which eps and MinPts have the lowest error.</p>
 
+</div>
+</div>
+<h3>References</h3>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-GongInspiration" class="csl-entry">
+Gong L., Morikawa T, Yamamoto T. 2018. <span>“Identification of Activity Stop Locations in GPS Trajectories by DBSCAN-TE Method Combined with Support Vector Machines.”</span> <em>Transportation Research Procedia</em>. <a href="https://doi.org/10.1016/J.TRPRO.2018.10.028">https://doi.org/10.1016/J.TRPRO.2018.10.028</a>.
 </div>
 </div>
             </section>

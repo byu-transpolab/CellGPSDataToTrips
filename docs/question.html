@@ -4,11 +4,11 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Converting Cellular GPS Data into Trips Using R</title>
+  <title>My Maps</title>
   <meta name="description" content="A short description" />
   <meta name="generator" content="bookdown 0.24 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Converting Cellular GPS Data into Trips Using R" />
+  <meta property="og:title" content="My Maps" />
   <meta property="og:type" content="book" />
   
   
@@ -16,14 +16,14 @@
   
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Converting Cellular GPS Data into Trips Using R" />
+  <meta name="twitter:title" content="My Maps" />
   
   <meta name="twitter:description" content="A short description" />
   
 
 
 
-<meta name="date" content="2021-11-11" />
+<meta name="date" content="2021-11-12" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -194,7 +194,7 @@ div.csl-indent {
       <div class="body-inner">
         <div class="book-header" role="navigation">
           <h1>
-            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Converting Cellular GPS Data into Trips Using R</a>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">My Maps</a>
           </h1>
         </div>
 
@@ -203,7 +203,7 @@ div.csl-indent {
 
             <section class="normal" id="section-">
 <div id="header">
-<h1 class="title">Converting Cellular GPS Data into Trips Using R</h1>
+<h1 class="title">My Maps</h1>
 <p class="author multi-author"><em>Gillian Riches</em></p>
 <address class="author_afil">
 Brigham Young University<br>
@@ -214,7 +214,7 @@ Brigham Young University<br>
 Brigham Young University<br>
 <a class="author_email" href="mailto:#"><a href="mailto:gregmacfarlane@byu.edu" class="email">gregmacfarlane@byu.edu</a></a>
 </address>
-<p class="date"><em>2021-11-11</em></p>
+<p class="date"><em>2021-11-12</em></p>
 <div class="abstract">
 <p class="abstract">Abstract</p>
 <p>This is where the abstract should go.</p>
@@ -223,10 +223,10 @@ Brigham Young University<br>
 <div id="question" class="section level1" number="1">
 <h1><span class="header-section-number"> 1</span> Question</h1>
 <p>Global Positioning System (GPS) surveys have become a more accurate and reputable alternative to previous travel survey methods that collect activity-travel patterns. Despite GPS devices’ ability to record time and positional characteristics, they still require cleaning and processing in order to convert the positional characteristics into trip purposes and activities.</p>
-<p>Currently, many researchers use time and speed rule-based algorithms to define when and where activities occur <span class="citation">(<a href="#ref-reviewOfMethods2014" role="doc-biblioref">Shen and Stopher 2014</a>)</span>. Due to their subjective nature, these rules are not ideal. For example, people walk at different speeds, so the speed threshold at which someone is considered stagnant would require manual changing from person to person. If not changed, the number of activities for each person could be misleading and inaccurate. These issues may explain why rule-based algorithms’ accuracies typically range from 43% to 61% <span class="citation">(<a href="#ref-reviewOfMethods2014" role="doc-biblioref">Shen and Stopher 2014</a>)</span>. While these results are not ideal, the initial data cleaning process these methods undergo prior to processing is a good place to start.</p>
+<p>Currently, many researchers use time and speed rule-based algorithms to define when and where activities occur <span class="citation">(<a href="#ref-reviewOfMethods2014" role="doc-biblioref">Shen and Stopher 2014</a>)</span>. Due to their subjective nature, these rules are not ideal. For example, people walk at different speeds, so the speed threshold at which someone is considered stagnant would require manual changing from person to person. If not changed, the number of activities for each person could be misleading and inaccurate. These issues may explain why rule-based algorithms’ accuracies typically range from 43% to 61% <span class="citation">(<a href="#ref-reviewOfMethods2014" role="doc-biblioref">Shen and Stopher 2014</a>)</span>. While these results are not ideal, the initial data cleaning process these methods undergo prior to processing is a useful reference.</p>
 <p>Once the data is cleaned and ready to be analyzed, a cluster-based algorithm should be applied instead of a rule-based algorithm. In a cluster-based algorithm, the density of GPS points within a predefined radius determines an activity. Although the radius and point density values are still parameters that the researcher needs to choose in the beginning, they would not vary from person to person. Therefore, when selected properly, these objective parameters lead to more accurate activity counts. In fact, one experiment <span class="citation">(<a href="#ref-DBAlgorithm2017" role="doc-biblioref">Luo et al. 2017</a>)</span> using a DBSCAN cluster-based algorithms proved to be 92% precise.</p>
-<p>One way to determine the minPoints and radius (eps) thresholds is to arbitrarily pick the minPoints based on how large the data set is (with a minimum of three) and then set k = minPts in a k-distance plot<span class="citation">(<a href="#ref-RKNNMethod2018" role="doc-biblioref">Kassambara 2018</a>)</span>. Good values of the radius value is where the k-distance plot shows a strong bend. Another method involves calculating the arithmetic mean and standard deviation of a synthetic GPS trajectory, and subject those values to a Gaussian curve equation to solve for eps given an arbitrary minPts <span class="citation">(<a href="#ref-GaussianMethod2009" role="doc-biblioref">Xiu-Li and Wei-Xiang 2009</a>)</span> .</p>
-<p>The purpose of this paper is to determine how much the minPts threshold affects the eps value and, subsequently, which minPts and eps parameters would work best for my particular GPS data set.</p>
+<p>One way to determine the minPoints and radius (eps) thresholds is to arbitrarily pick the minPoints based on how large the data set is (with a minimum of three) and then set k = minPts in a k-distance plot <span class="citation">(<a href="#ref-RKNNMethod2018" role="doc-biblioref">Kassambara 2018</a>)</span>. Good values of the radius value is where the k-distance plot shows a strong bend. Another method involves calculating the arithmetic mean and standard deviation of a synthetic GPS trajectory, and subject those values to a Gaussian curve equation to solve for eps given an arbitrary minPts <span class="citation">(<a href="#ref-GaussianMethod2009" role="doc-biblioref">Xiu-Li and Wei-Xiang 2009</a>)</span> .</p>
+<p>The purpose of this paper is to determine how much the minPts threshold affects the eps value and, subsequently, which DBSCAN minPts and eps parameters would work best for my particular GPS data set after it has been cleaned.</p>
 
 </div>
 <h3>References</h3>

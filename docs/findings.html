@@ -4,11 +4,11 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title> 3 Findings | Converting Cellular GPS Data into Trips Using R</title>
+  <title> 3 Findings | My Maps</title>
   <meta name="description" content="A short description" />
   <meta name="generator" content="bookdown 0.24 and GitBook 2.6.7" />
 
-  <meta property="og:title" content=" 3 Findings | Converting Cellular GPS Data into Trips Using R" />
+  <meta property="og:title" content=" 3 Findings | My Maps" />
   <meta property="og:type" content="book" />
   
   
@@ -16,14 +16,14 @@
   
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content=" 3 Findings | Converting Cellular GPS Data into Trips Using R" />
+  <meta name="twitter:title" content=" 3 Findings | My Maps" />
   
   <meta name="twitter:description" content="A short description" />
   
 
 
 
-<meta name="date" content="2021-11-11" />
+<meta name="date" content="2021-11-12" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -194,7 +194,7 @@ div.csl-indent {
       <div class="body-inner">
         <div class="book-header" role="navigation">
           <h1>
-            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Converting Cellular GPS Data into Trips Using R</a>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">My Maps</a>
           </h1>
         </div>
 
@@ -208,10 +208,10 @@ div.csl-indent {
 on what it is that you are working on. But you’ll probably say something like
 “The initial model estimation results are given in Table <a href="#tab:estimation-results"><strong>??</strong></a>.”
 That table is created with the <code>modelsummary()</code> package and function.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="findings.html#cb3-1" aria-hidden="true" tabindex="-1"></a>model1 <span class="ot">&lt;-</span> <span class="fu">mlogit</span>(choice <span class="sc">~</span> type <span class="sc">+</span> price <span class="sc">|</span> <span class="sc">-</span><span class="dv">1</span>, <span class="at">data =</span> car_mlogit)</span>
-<span id="cb3-2"><a href="findings.html#cb3-2" aria-hidden="true" tabindex="-1"></a>model2 <span class="ot">&lt;-</span> <span class="fu">update</span>(model1, .<span class="sc">~</span>. <span class="sc">+</span> range)</span>
-<span id="cb3-3"><a href="findings.html#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-4"><a href="findings.html#cb3-4" aria-hidden="true" tabindex="-1"></a>models <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="st">&quot;Model 1&quot;</span> <span class="ot">=</span> model1, <span class="st">&quot;Model 2&quot;</span> <span class="ot">=</span> model2)</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="findings.html#cb1-1" aria-hidden="true" tabindex="-1"></a>model1 <span class="ot">&lt;-</span> <span class="fu">mlogit</span>(choice <span class="sc">~</span> type <span class="sc">+</span> price <span class="sc">|</span> <span class="sc">-</span><span class="dv">1</span>, <span class="at">data =</span> car_mlogit)</span>
+<span id="cb1-2"><a href="findings.html#cb1-2" aria-hidden="true" tabindex="-1"></a>model2 <span class="ot">&lt;-</span> <span class="fu">update</span>(model1, .<span class="sc">~</span>. <span class="sc">+</span> range)</span>
+<span id="cb1-3"><a href="findings.html#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="findings.html#cb1-4" aria-hidden="true" tabindex="-1"></a>models <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="st">&quot;Model 1&quot;</span> <span class="ot">=</span> model1, <span class="st">&quot;Model 2&quot;</span> <span class="ot">=</span> model2)</span></code></pre></div>
 <p>With those results presented, you can go into a discussion of what they mean.
 first, discuss the actual results that are shown in the table, and then any
 interesting or unintuitive observations.</p>

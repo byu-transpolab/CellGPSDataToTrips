@@ -1,6 +1,6 @@
 # Methods
 
-```{r setup, include = FALSE}
+```{r setup2, include = FALSE}
 # load R libraries here; the `include` flag in the chunk options above tells
 # whether to print the results or not. Usually you don't want to print the
 # library statements, or any code on the pdf.
