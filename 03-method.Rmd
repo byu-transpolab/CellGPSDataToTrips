@@ -42,51 +42,49 @@ if(knitr::is_latex_output()) {
 
 ```
 
-In this chapter, you describe the approach you have taken on the problem. This 
-usually involves a discussion about both the data you used and the models you
-applied.
-
 ## Data
 
-Discuss where you got your data, how you cleaned it, any assumptions you made.
+The GPS data used to determine the minPts and eps parameters come from 60 volunteers in
+the Utah County area and were taken over a period of six or more months depending on the person. An example of what the raw GPS data looked like is shown in Figure 2.1.
 
-```{r load_data}
-data("Car", package = "mlogit")
-car_mlogit <- Car %>%
-  mutate(choice = gsub("choice", "", choice)) %>%
-  dfidx( varying = 5:70, shape = "wide", choice = "choice", sep = "")
+```{r Figure1, echo=FALSE, message=FALSE, warning=FALSE}
+rawData <- read_csv("data/Health Study_5f5184e73e2fd848eac22aec_passivelocation_57.csv")
+
+rawData <- head(rawData)
+
+rawData1 <- rawData %>%
+  select(accuracy, timestamp, speed, lat,lon, time)
+
+rawData1 %>%
+kbl(booktabs = T, caption = "Raw GPS Data", longtable = T) %>%
+  kable_styling(full_width = F)
+
 ```
 
-Often there will be a table describing summary statistics of your dataset.
-Table \@ref(tab:datasummary) shows a nice table using the [`datasummary`](https://vincentarelbundock.github.io/modelsummary/articles/datasummary.html) 
-functions in the `modelsummary` package.
+Before the GPS data can be processed, it had to be cleaned and reformatted. Since a DBSCAN algorithm is being used, the speed variable was removed completely. From there, the dates and times had to be reformatted using functions from the **lubridate** package in R and by writing a "Yesterday" function that defines days as being from 3 AM to 3 AM instead of 12 AM to 12 AM. This was done because large amount of the demographic is college students, and they are likely to make trips after midnight. Table 2.2 shows what the cleaned data looked like.
 
-```{r datasummary}
-datasummary_balance(
-  ~type, 
-  data = car_mlogit %>% 
-    select(type, fuel, price, range, size), 
-  dinm = FALSE,
-  title = "Descriptive Statistics of Dataset"
-  )
+```{r Figure2, echo=FALSE, message=FALSE, warning=FALSE}
+source("R/gps2trips.R")
+
+cleaned_data <- makeCaps("data")
+cleaned_data <- head(cleaned_data)
+
+cleaned_data %>%
+kbl(booktabs = T, caption = "Cleaned GPS Data", longtable = T) %>%
+  kable_styling(full_width = F)
+
 ```
+
 
 ## Models
 
-If your work is mostly a new model, you probably will have introduced some
-details in the literature review. But this is where you describe the
-mathematical construction of your model, the variables it uses, and other
-things. Some methods are so common (linear regression) that it is unnecessary to
-explore them in detail. But others will need to be described, often with
-mathematics.  For example, the probability of a multinomial logit model is
+Once the data is cleaned and properly formatted, it is run through a DBSCAN algorithm largely based on the method done by Gong et al. in 2018 [@GongInspiration]. This is where the eps and MinPts parameters will be chosen. After the DBSCAN algorithm determines how many clusters there are, they get split based on the time between consecutive points. This is to remove any error that comes from when a person makes two trips to the same place in one day (Ex. Home). Now, that cluster counts as two separate clusters if the time difference between the clusters is large enough. 
+
+Finally, there is an entropy calculation step where entropy is determined by the change in departure angle between consecutive points. The equation for this entropy is shown in the equation below [@GongInspiration]. If the points are in a line, the person is likely at a stoplight and the entropy is very low. Implementing this entropy equation also removes the need for any subjective time or speed rules. For the purposes of this question, the entropy constraint will always be set to 0.5. The only changing parameters will be MinPts and eps.
 
 \begin{equation}
-  P_i(X_{in}) = \frac{e^{X_{in}\beta_i}}{\sum_{j \in J}e^{X_{jn}\beta_j}}
-  (\#eq:mnl)
+  EI_q = -\sum_{d=1}^D ((\frac{n_d}{N})ln(\frac{n_d}{N}))
 \end{equation}
 
-Use [LaTeX mathematics](https://www.overleaf.com/learn/latex/mathematical_expressions). 
-You'll want to number display equations so that you can
-refer to them later in the manuscript. Other simpler math can be described inline,
-like saying that $i, j \in J$. Details on using equations in bookdown are available
-[here](https://bookdown.org/yihui/bookdown/markdown-extensions-by-bookdown.html).
+The resulting clusters from this DBSCAN and entropy hybrid model are displayed in maps using R. For this experiment, I will look at a map of the cleaned data and determine how many clusters it looks like there is. Then, the data goes through the model and the calculated number of clusters is compared to how many I saw originally. I repeated this 5 times over 10 days in order to determine which eps and MinPts have the lowest error.
+
