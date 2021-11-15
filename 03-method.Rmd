@@ -61,12 +61,13 @@ kbl(booktabs = T, caption = "Raw GPS Data", longtable = T) %>%
 
 ```
 
-Before the GPS data can be processed, it had to be cleaned and reformatted. Since a DBSCAN algorithm is being used, the speed variable was removed completely. From there, the dates and times had to be reformatted using functions from the **lubridate** package in R and by writing a "Yesterday" function that defines days as being from 3 AM to 3 AM instead of 12 AM to 12 AM. This was done because large amount of the demographic is college students, and they are likely to make trips after midnight. Table 2.2 shows what the cleaned data looked like.
+Before the GPS data can be processed, it had to be cleaned and reformatted. Since a DBSCAN algorithm is being used, the speed variable was removed completely. From there, the dates and times had to be reformatted using functions from the **lubridate** package in R and by writing a "Yesterday" function with output "ActivityDay" that defines activity days as being from 3 AM to 3 AM instead of 12 AM to 12 AM. This was done because many respondents are college students, so they are likely to make trips after midnight. Table 2.2 shows what the cleaned data looked like.
 
 ```{r Figure2, echo=FALSE, message=FALSE, warning=FALSE}
 source("R/gps2trips.R")
 
-cleaned_data <- makeCaps("data")
+cleaned_data <- makeCaps("data") %>%
+  select(lat,lon,timestamp,date,time,activityDay)
 cleaned_data <- head(cleaned_data)
 
 cleaned_data %>%

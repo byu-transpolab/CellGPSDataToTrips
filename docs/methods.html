@@ -23,7 +23,7 @@
 
 
 
-<meta name="date" content="2021-11-12" />
+<meta name="date" content="2021-11-15" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -357,16 +357,13 @@ time
 </tr>
 </tbody>
 </table>
-<p>Before the GPS data can be processed, it had to be cleaned and reformatted. Since a DBSCAN algorithm is being used, the speed variable was removed completely. From there, the dates and times had to be reformatted using functions from the <strong>lubridate</strong> package in R and by writing a “Yesterday” function that defines days as being from 3 AM to 3 AM instead of 12 AM to 12 AM. This was done because large amount of the demographic is college students, and they are likely to make trips after midnight. Table 2.2 shows what the cleaned data looked like.</p>
+<p>Before the GPS data can be processed, it had to be cleaned and reformatted. Since a DBSCAN algorithm is being used, the speed variable was removed completely. From there, the dates and times had to be reformatted using functions from the <strong>lubridate</strong> package in R and by writing a “Yesterday” function with output “ActivityDay” that defines activity days as being from 3 AM to 3 AM instead of 12 AM to 12 AM. This was done because many respondents are college students, so they are likely to make trips after midnight. Table 2.2 shows what the cleaned data looked like.</p>
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <caption>
 <span id="tab:Figure2">Table 2.2: </span>Cleaned GPS Data
 </caption>
 <thead>
 <tr>
-<th style="text-align:left;">
-id
-</th>
 <th style="text-align:right;">
 lat
 </th>
@@ -382,13 +379,13 @@ date
 <th style="text-align:left;">
 time
 </th>
+<th style="text-align:left;">
+activityDay
+</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align:left;">
-5f5184e73e2fd848eac22aec
-</td>
 <td style="text-align:right;">
 40.25293
 </td>
@@ -404,11 +401,11 @@ time
 <td style="text-align:left;">
 22:59:36
 </td>
+<td style="text-align:left;">
+17-3
+</td>
 </tr>
 <tr>
-<td style="text-align:left;">
-5f5184e73e2fd848eac22aec
-</td>
 <td style="text-align:right;">
 40.25293
 </td>
@@ -424,11 +421,11 @@ time
 <td style="text-align:left;">
 22:59:37
 </td>
+<td style="text-align:left;">
+17-3
+</td>
 </tr>
 <tr>
-<td style="text-align:left;">
-5f5184e73e2fd848eac22aec
-</td>
 <td style="text-align:right;">
 40.25293
 </td>
@@ -444,11 +441,11 @@ time
 <td style="text-align:left;">
 22:59:38
 </td>
+<td style="text-align:left;">
+17-3
+</td>
 </tr>
 <tr>
-<td style="text-align:left;">
-5f5184e73e2fd848eac22aec
-</td>
 <td style="text-align:right;">
 40.25293
 </td>
@@ -464,11 +461,11 @@ time
 <td style="text-align:left;">
 22:59:39
 </td>
+<td style="text-align:left;">
+17-3
+</td>
 </tr>
 <tr>
-<td style="text-align:left;">
-5f5184e73e2fd848eac22aec
-</td>
 <td style="text-align:right;">
 40.25293
 </td>
@@ -484,11 +481,11 @@ time
 <td style="text-align:left;">
 22:59:40
 </td>
+<td style="text-align:left;">
+17-3
+</td>
 </tr>
 <tr>
-<td style="text-align:left;">
-5f5184e73e2fd848eac22aec
-</td>
 <td style="text-align:right;">
 40.25293
 </td>
@@ -503,6 +500,9 @@ time
 </td>
 <td style="text-align:left;">
 22:59:41
+</td>
+<td style="text-align:left;">
+17-3
 </td>
 </tr>
 </tbody>
