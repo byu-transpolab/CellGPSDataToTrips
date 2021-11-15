@@ -3,9 +3,6 @@ library(targets)
 source("R/gps2trips.R")
 source("R/MakeMaps.R")
 
-#files_in_folder <- list.files("data")
-
-
 # Set target-specific options such as packages.
 tar_option_set(packages = c("dplyr","hms", "lubridate", "tidyverse", "leaflet", "sf", "gpsactivs"))
 
