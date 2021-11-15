@@ -20,10 +20,10 @@ makeCaps <- function(folder) {
         time = hms::as_hms(str_c(hour, minute, second, sep = ":")),
       ) %>% select(-hour, -minute, -second)
   }) %>%
-    dplyr::bind_rows() #%>%
-    #mutate(
-    #  activityDay = yesterday(timestamp)
-    #)
+    dplyr::bind_rows() %>%
+    mutate(
+     activityDay = yesterday(timestamp)
+    ) 
 }
 
 #' Function to compute meaningful day
