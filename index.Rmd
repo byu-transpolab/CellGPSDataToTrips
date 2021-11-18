@@ -1,5 +1,5 @@
 ---
-title: "Converting Cellular GPS Data into Trips Using R"
+title: "Determining Parameters for DBSCAN and Entropy Hybrid Algorithm for Converting GPS Points to Activties"
 author:
 - name: Gillian Riches
   email: martingillian4@gmail.com
