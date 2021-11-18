@@ -53,7 +53,7 @@
 \hypersetup{breaklinks=true,
             bookmarks=true,
             pdfauthor={},
-            pdftitle={My Maps},
+            pdftitle={Converting Cellular GPS Data into Trips Using R},
             colorlinks=false,
             urlcolor=blue,
             linkcolor=magenta,
@@ -87,7 +87,7 @@
 \begin{document}
 \begin{frontmatter}
 
-  \title{My Maps}
+  \title{Converting Cellular GPS Data into Trips Using R}
     \author[Brigham Young University]{Gillian Riches\corref{1}}
    \ead{martingillian4@gmail.com} 
     \author[Brigham Young University]{Gregory Macfarlane\corref{2}}
@@ -105,15 +105,15 @@
 \hypertarget{question}{%
 \section{Question}\label{question}}
 
-Global Positioning System (GPS) surveys have become a more accurate and reputable alternative to previous travel survey methods that collect activity-travel patterns. Despite GPS devices' ability to record time and positional characteristics, they still require cleaning and processing in order to convert the positional characteristics into trip purposes and activities.
+Global Positioning System (GPS) surveys have become a more accurate and reputable alternative to previous travel survey methods that collect activity-travel patterns. Despite GPS devices' ability to record time and positional characteristics, they still require two steps, cleaning and processing, in order to convert the positional characteristics into trip purposes and activities.
 
-Currently, many researchers use time and speed rule-based algorithms to define when and where activities occur \citep{reviewOfMethods2014}. Due to their subjective nature, these rules are not ideal. For example, people walk at different speeds, so the speed threshold at which someone is considered stagnant would require manual changing from person to person. If not changed, the number of activities for each person could be misleading and inaccurate. These issues may explain why rule-based algorithms' accuracies typically range from 43\% to 61\% \citep{reviewOfMethods2014}. While these results are not ideal, the initial data cleaning process these methods undergo prior to processing is a useful reference.
+Currently, many researchers use time and speed rule-based algorithms to define when and where activities occur \citep{reviewOfMethods2014}. Due to their subjective nature, these rules are not ideal. For example, people walk at different speeds, so the speed threshold at which someone is considered stagnant would require manual changing from person to person. If not changed, the number of activities for each person could be misleading and inaccurate. These issues may explain why rule-based algorithms' accuracies typically range from 43\% to 61\% \citep{reviewOfMethods2014}. While these processing results (Step 2) are not ideal, the data-cleaning method (Step 1) still serves as a reputable guide regardless of the processing method.
 
-Once the data is cleaned and ready to be analyzed, a cluster-based algorithm should be applied instead of a rule-based algorithm. In a cluster-based algorithm, the density of GPS points within a predefined radius determines an activity. Although the radius and point density values are still parameters that the researcher needs to choose in the beginning, they would not vary from person to person. Therefore, when selected properly, these objective parameters lead to more accurate activity counts. In fact, one experiment \citep{DBAlgorithm2017} using a DBSCAN cluster-based algorithms proved to be 92\% precise.
+Therefore, once the data is cleaned with accordance to rule-based algorithm methods, a DBSCAN and entropy based algorithm should be applied for the processing step. In this type of algorithm, four parameters are needed to determine an activity: minimum number of points (minpts) within a predefined radius (eps) with a minimum amount of entropy (entr\_t) \citep{GongInspiration}, and after a certain period of time from the previous activity (delta\_t) . When selected properly, these parameters will not need to change from person to person and therefore often lead to more accurate activity counts. In fact, one experiment \citep{DBAlgorithm2017} using just a DBSCAN cluster-based algorithms proved to be 92\% precise.
 
-One way to determine the minPoints and radius (eps) thresholds is to arbitrarily pick the minPoints based on how large the data set is (with a minimum of three) and then set k = minPts in a k-distance plot \citep{RKNNMethod2018}. Good values of the radius value is where the k-distance plot shows a strong bend. Another method involves calculating the arithmetic mean and standard deviation of a synthetic GPS trajectory, and subject those values to a Gaussian curve equation to solve for eps given an arbitrary minPts \citep{GaussianMethod2009} .
+One way to select the minPoints and radius (eps) thresholds is to arbitrarily pick the minPoints based on how large the data set is (with a minimum of three) and then set k = minPts in a k-distance plot \citep{RKNNMethod2018}. Good values of the radius value is where the k-distance plot shows a strong bend. Another method involves calculating the arithmetic mean and standard deviation of a synthetic GPS trajectory, and subject those values to a Gaussian curve equation to solve for eps given an arbitrary minPts \citep{GaussianMethod2009}. Unfortunately, these methods only work in a pure DBSCAN algorithm where only minpts and eps are accounted for, not entr\_t and delta\_t.
 
-The purpose of this paper is to determine how much the minPts threshold affects the eps value and, subsequently, which DBSCAN minPts and eps parameters would work best for my particular GPS data set after it has been cleaned.
+Hence, the purpose of this paper is to explore a method of how to simultaneously select all four parameters as accurately as possible in a DBSCAN entropy based algorithm after the GPS data has been cleaned.
 
 \hypertarget{methods}{%
 \section{Methods}\label{methods}}
@@ -121,7 +121,7 @@ The purpose of this paper is to determine how much the minPts threshold affects 
 \hypertarget{data}{%
 \subsection{Data}\label{data}}
 
-The GPS data used to determine the minPts and eps parameters come from 60 volunteers in
+The GPS data used to determine the four most accurate parameters come from 60 volunteers in
 the Utah County area and were taken over a period of six or more months depending on the person. An example of what the raw GPS data looked like is shown in Figure 2.1.
 
 \begin{longtable}[t]{rlrrrr}
@@ -139,35 +139,42 @@ accuracy & timestamp & speed & lat & lon & time\\
 \bottomrule
 \end{longtable}
 
-Before the GPS data can be processed, it had to be cleaned and reformatted. Since a DBSCAN algorithm is being used, the speed variable was removed completely. From there, the dates and times had to be reformatted using functions from the \textbf{lubridate} package in R and by writing a ``Yesterday'' function that defines days as being from 3 AM to 3 AM instead of 12 AM to 12 AM. This was done because large amount of the demographic is college students, and they are likely to make trips after midnight. Table 2.2 shows what the cleaned data looked like.
+Before the GPS data can be processed, it had to be cleaned and reformatted. Since a DBSCAN algorithm is being used, the speed variable was removed completely. From there, the dates and times had to be reformatted using functions from the \textbf{lubridate} package in R and by writing a ``Yesterday'' function with output ``ActivityDay'' that defines activity days as being from 3 AM to 3 AM instead of 12 AM to 12 AM. This was done because many respondents are college students, so they are likely to make trips after midnight. Table 2.2 shows what the cleaned data looked like.
 
-\begin{longtable}[t]{lrrlll}
+\begin{longtable}[t]{rrllll}
 \caption{\label{tab:Figure2}Cleaned GPS Data}\\
 \toprule
-id & lat & lon & timestamp & date & time\\
+lat & lon & timestamp & date & time & activityDay\\
 \midrule
-5f5184e73e2fd848eac22aec & 40.25293 & -111.6602 & 2021-03-17 22:59:36 & 2021-03-17 & 22:59:36\\
-5f5184e73e2fd848eac22aec & 40.25293 & -111.6602 & 2021-03-17 22:59:37 & 2021-03-17 & 22:59:37\\
-5f5184e73e2fd848eac22aec & 40.25293 & -111.6602 & 2021-03-17 22:59:38 & 2021-03-17 & 22:59:38\\
-5f5184e73e2fd848eac22aec & 40.25293 & -111.6602 & 2021-03-17 22:59:39 & 2021-03-17 & 22:59:39\\
-5f5184e73e2fd848eac22aec & 40.25293 & -111.6602 & 2021-03-17 22:59:40 & 2021-03-17 & 22:59:40\\
+40.25293 & -111.6602 & 2021-03-17 22:59:36 & 2021-03-17 & 22:59:36 & 17-3\\
+40.25293 & -111.6602 & 2021-03-17 22:59:37 & 2021-03-17 & 22:59:37 & 17-3\\
+40.25293 & -111.6602 & 2021-03-17 22:59:38 & 2021-03-17 & 22:59:38 & 17-3\\
+40.25293 & -111.6602 & 2021-03-17 22:59:39 & 2021-03-17 & 22:59:39 & 17-3\\
+40.25293 & -111.6602 & 2021-03-17 22:59:40 & 2021-03-17 & 22:59:40 & 17-3\\
 \addlinespace
-5f5184e73e2fd848eac22aec & 40.25293 & -111.6602 & 2021-03-17 22:59:41 & 2021-03-17 & 22:59:41\\
+40.25293 & -111.6602 & 2021-03-17 22:59:41 & 2021-03-17 & 22:59:41 & 17-3\\
 \bottomrule
 \end{longtable}
 
 \hypertarget{models}{%
 \subsection{Models}\label{models}}
 
-Once the data is cleaned and properly formatted, it is run through a DBSCAN algorithm largely based on the method done by Gong et al.~in 2018 \citep{GongInspiration}. This is where the eps and MinPts parameters will be chosen. After the DBSCAN algorithm determines how many clusters there are, they get split based on the time between consecutive points. This is to remove any error that comes from when a person makes two trips to the same place in one day (Ex. Home). Now, that cluster counts as two separate clusters if the time difference between the clusters is large enough.
+Once the data is cleaned and properly formatted, it is run through a DBSCAN-entropy hybrid algorithm largely based on the method created by Gong et al.~in 2018 \citep{GongInspiration}. After the DBSCAN algorithm determines how many total clusters there are based on the eps and minpts parameters, they get further split based on the delta\_t parameter if necessary. If the time difference between points at the same place is greater than delta\_t, then the points will be split into two separate clusters or activities.
 
-Finally, there is an entropy calculation step where entropy is determined by the change in departure angle between consecutive points. The equation for this entropy is shown in the equation below \citep{GongInspiration}. If the points are in a line, the person is likely at a stoplight and the entropy is very low. Implementing this entropy equation also removes the need for any subjective time or speed rules. For the purposes of this question, the entropy constraint will always be set to 0.5. The only changing parameters will be MinPts and eps.
+Finally, there is an entropy calculation step where entropy is determined by the change in departure angle between consecutive points. The equation for this entropy is shown in the equation below \citep{GongInspiration}. If the points are in a line, the entropy is very low. In this algorithm, the entr\_t parameter determines at which entropy someone is actually likely to be moving and not just at a stoplight, etc.
 
 \begin{equation}
   EI_q = -\sum_{d=1}^D ((\frac{n_d}{N})ln(\frac{n_d}{N}))
 \end{equation}
 
-The resulting clusters from this DBSCAN and entropy hybrid model are displayed in maps using R. For this experiment, I will look at a map of the cleaned data and determine how many clusters it looks like there is. Then, the data goes through the model and the calculated number of clusters is compared to how many I saw originally. I repeated this 5 times over 10 days in order to determine which eps and MinPts have the lowest error.
+For this experiment, I will look at a map of the unprocessed, cleaned data and determine with my eyes how many clusters there are. Then, the hybrid algorithm will calculate the number of clusters using randomized values for the four parameters. Based on all the previous research that has been discussed, the ranges for the possible parameters are as follows:
+
+minpts: (3,10)
+eps: (1,50)
+delta\_t: (300, 1500) seconds
+entr\_t: (0.5,3)
+
+Then, I will compare the amount of clusters I saw to the number of clusters the hybrid algorithm calculated. This process was repeated 5 times over 10 different days in order to determine which parameters are the most accurate.
 
 \hypertarget{findings}{%
 \section{Findings}\label{findings}}
@@ -201,8 +208,6 @@ If the analysis is substantial, it might become its own top-level section.
 \hypertarget{acknowledgements}{%
 \section*{Acknowledgements}\label{acknowledgements}}
 \addcontentsline{toc}{section}{Acknowledgements}
-
-This is where you will put your acknowledgments
 
 \bibliography{book.bib}
 
