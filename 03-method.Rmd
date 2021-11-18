@@ -44,7 +44,7 @@ if(knitr::is_latex_output()) {
 
 ## Data
 
-The GPS data used to determine the minPts and eps parameters come from 60 volunteers in
+The GPS data used to determine the four most accurate parameters come from 60 volunteers in
 the Utah County area and were taken over a period of six or more months depending on the person. An example of what the raw GPS data looked like is shown in Figure 2.1.
 
 ```{r Figure1, echo=FALSE, message=FALSE, warning=FALSE}
@@ -79,13 +79,20 @@ kbl(booktabs = T, caption = "Cleaned GPS Data", longtable = T) %>%
 
 ## Models
 
-Once the data is cleaned and properly formatted, it is run through a DBSCAN algorithm largely based on the method done by Gong et al. in 2018 [@GongInspiration]. This is where the eps and MinPts parameters will be chosen. After the DBSCAN algorithm determines how many clusters there are, they get split based on the time between consecutive points. This is to remove any error that comes from when a person makes two trips to the same place in one day (Ex. Home). Now, that cluster counts as two separate clusters if the time difference between the clusters is large enough. 
+Once the data is cleaned and properly formatted, it is run through a DBSCAN-entropy hybrid algorithm largely based on the method created by Gong et al. in 2018 [@GongInspiration]. After the DBSCAN algorithm determines how many total clusters there are based on the eps and minpts parameters, they get further split based on the delta_t parameter if necessary. If the time difference between points at the same place is greater than delta_t, then the points will be split into two separate clusters or activities. 
 
-Finally, there is an entropy calculation step where entropy is determined by the change in departure angle between consecutive points. The equation for this entropy is shown in the equation below [@GongInspiration]. If the points are in a line, the person is likely at a stoplight and the entropy is very low. Implementing this entropy equation also removes the need for any subjective time or speed rules. For the purposes of this question, the entropy constraint will always be set to 0.5. The only changing parameters will be MinPts and eps.
+Finally, there is an entropy calculation step where entropy is determined by the change in departure angle between consecutive points. The equation for this entropy is shown in the equation below [@GongInspiration]. If the points are in a line, the entropy is very low. In this algorithm, the entr_t parameter determines at which entropy someone is actually likely to be moving and not just at a stoplight, etc.
 
 \begin{equation}
   EI_q = -\sum_{d=1}^D ((\frac{n_d}{N})ln(\frac{n_d}{N}))
 \end{equation}
 
-The resulting clusters from this DBSCAN and entropy hybrid model are displayed in maps using R. For this experiment, I will look at a map of the cleaned data and determine how many clusters it looks like there is. Then, the data goes through the model and the calculated number of clusters is compared to how many I saw originally. I repeated this 5 times over 10 days in order to determine which eps and MinPts have the lowest error.
+For this experiment, I will look at a map of the unprocessed, cleaned data and determine with my eyes how many clusters there are. Then, the hybrid algorithm will calculate the number of clusters using randomized values for the four parameters. Based on all the previous research that has been discussed, the ranges for the possible parameters are as follows:
+
+minpts: (3,10)
+eps: (1,50)
+delta_t: (300, 1500) seconds
+entr_t: (0.5,3)
+
+Then, I will compare the amount of clusters I saw to the number of clusters the hybrid algorithm calculated. This process was repeated 5 times over 10 different days in order to determine which parameters are the most accurate.
 
