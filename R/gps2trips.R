@@ -23,7 +23,16 @@ makeCaps <- function(folder) {
     dplyr::bind_rows() %>%
     mutate(
      activityDay = yesterday(timestamp)
-    ) 
+    ) %>%
+    mutate(min = str_c(str_pad(hour(timestamp), width = 2, pad = "0"),
+                       str_pad(minute(timestamp), width = 2, pad = "0"),
+                       str_pad(date(timestamp), width = 2, pad = "0"))) %>%
+    group_by(min) %>% slice_sample(n = 20) %>%
+    arrange(timestamp) %>%
+    group_by(date) %>%
+    nest() %>%
+    mutate(n = map(data, nrow)) %>%
+    filter(n > 400)
 }
 
 #' Function to compute meaningful day
@@ -54,25 +63,38 @@ make_sf <- function(df) {
     st_transform(32612)
 }
 
- make_clusters <- function(df) {
-  gpsactivs::dbscan_te(df, eps = 25, minpts = 4,
-                       delta_t = 300, entr_t = 0.5)
+# param[1,2,3,4] are eps,minpts, delta_t, and entr_t respectively
+
+ make_clusters <- function(df, params = c(25,4,300,0.5)) {
+  gpsactivs::dbscan_te(df, params[1], params[2],
+                       params[3], params[4])
 }
 
-caps_tr <- function(caps){
+caps_tr <- function(caps, params){
   caps %>%
-  #filter(date(date) %in% as_date(c("2021-02-23", "2021-02-24", "2021-02-16"))) %>%
-  mutate(min = str_c(str_pad(hour(timestamp), width = 2, pad = "0"),
-                     str_pad(minute(timestamp), width = 2, pad = "0"),
-                     str_pad(date(timestamp), width = 2, pad = "0"))) %>%
-  group_by(min) %>% slice_sample(n = 20) %>%
-  arrange(timestamp) %>%
-  group_by(date) %>%
-  nest() %>%
-  mutate(n = map(data, nrow)) %>%
-  filter(n > 400) %>%
   mutate(data = map(data, make_sf),
-         clusters = map(data, make_clusters))
+         clusters = map2(data, params, make_clusters))
 
-  # creates clusters_per_day target
+  # creates clusters_per_date target
+}
+
+randomClusters <- function(caps, eps = c(1:40), minpts = c(1:10), delta_t = c(300:1200), 
+                            entr_t = c(0.5:2.50), ndraws = 5){
+  
+  # create a bunch of sets of parameters randomly.
+  comparison <- tibble(eps = sample(eps, ndraws, replace = TRUE),
+              minpts = sample(minpts, ndraws, replace = TRUE),
+              delta_t = sample(delta_t, ndraws, replace = TRUE),
+              entr_t = sample(entr_t, ndraws, replace = TRUE)) %>%
+    mutate(draw = row_number())
+  
+  comparison$param <- lapply(1:ndraws, function(i){
+    c(comparison$eps[i], comparison$minpts[i], comparison$delta_t[i], comparison$entr_t[i]) 
+  }) 
+  caps_tr(caps, params = comparison$param[1])
+  
+  caps %>% mutate(
+    clusters = map2(data, comparison$params[1], caps_tr)
+  )
+  comparison$cluster <- map2(caps, comparison$param, caps_tr)
 }
