@@ -1,5 +1,5 @@
 ---
-title: "Determining Parameters for DBSCAN and Entropy Hybrid Algorithm for Converting GPS Points to Activties"
+title: "Determining DBSCAN-Entrpopy Hybrid Algorithm Parameters for Converting GPS Points to Activities"
 author:
 - name: Gillian Riches
   email: martingillian4@gmail.com
