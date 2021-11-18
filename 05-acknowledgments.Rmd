@@ -1,9 +1,9 @@
 `r if (knitr::is_html_output())'
 # Acknowledgements {-}
-This is where you will put your acknowledgments
+
 '`
 
 `r if (knitr::is_latex_output())'
 # Acknowledgements {-}
-This is where you will put your acknowledgments
+
 '`
