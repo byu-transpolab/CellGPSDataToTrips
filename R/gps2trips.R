@@ -6,9 +6,9 @@
 # a single individual. Let's read all the CSV files in that folder
 
 makeCaps <- function(folder) {
-  files_in_folder <- dir(folder, full.names = TRUE)
+  files_in_folder <- unzip(folder, list = TRUE)$Name
   caps <- lapply(files_in_folder, function(x){
-    readr::read_csv(x , col_types = list(userId = col_character())) %>%
+    readr::read_csv(unz(folder,x) , col_types = list(userId = col_character())) %>%
       dplyr::transmute(
         id = userId,
         lat, lon,

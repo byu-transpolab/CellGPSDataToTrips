@@ -23,7 +23,7 @@ makeRawDataMaps <- function(clusters_per_date) {
                       + geom_sf(data = .x, color = "blue")
                       + labs(
                         title = "Raw GPS Data for",
-                        subtitle = date,
+                        subtitle = activityDay,
                         x = "Longitude",
                         y = "Latitude",
                       )
@@ -50,7 +50,7 @@ makeClusterMaps <- function(clusters_per_date) {
                         + geom_sf(data = .y, color = "green", size = 8)
                         + labs(
                           title = "Trips made on",
-                          subtitle = date,
+                          subtitle = activityDay,
                           x = "Longitude",
                           y = "Latitude",
                         )
