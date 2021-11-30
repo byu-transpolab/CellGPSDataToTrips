@@ -1,9 +1,4 @@
-source("R/gps2trips.R")
 
-library(targets)
-library(tidyverse)
-
-tar_load(clusters_per_date)
 
 makeRawDataMaps <- function(clusters_per_date) {
   clusters_per_date <- clusters_per_date %>% dplyr::filter(date == date)
