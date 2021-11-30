@@ -88,7 +88,6 @@ make_sf <- function(df) {
 #' @details param[1,2,3,4] are eps, minpts, delta_t, and entr_t respectively
 
 make_clusters <- function(df, params) {
-  print(params)
   gpsactivs::dbscan_te(df, eps = params[1], minpts = params[2],
                        delta_t = params[3], entr_t = params[4])
 }
@@ -101,10 +100,10 @@ make_clusters <- function(df, params) {
 #' for that date, the nested data column, and the nested clusters column
 #' @details the nested data and clusters column come from make_sf() and make_clusters()
 #' respectively
-
 caps_tr <- function(params, caps){
   print(params)
   caps %>%
+    ungroup() %>%
     mutate(data = map(data, make_sf)) %>%
     mutate(clusters = map(data, make_clusters, params = params))
   
