@@ -114,14 +114,24 @@ param_packer <- function(x, y, z, q){
   list(c(x, y, z, q)) 
 }
 
-randomClusters <- function(caps, eps = c(1:40), minPts = c(1:10), delta_t = c(300:1200), 
-                           entr_t = c(0.5:2.50), ndraws = 5){
+#' Generate multiple estimates of the dbscan with random parameters
+#'
+#' @param caps Dataset of CAPS gps traces
+#' @param eps parameter for generating random eps. This is the mean of a normal
+#'   distribution
+#' @param minPts parameter for generating random minimum points. This is the maximum
+#'   integer allowed
+#' @param delta_t parameter for generating time splits between activities. This 
+#'   is the arrival rate of a negative exponential function.
+randomClusters <- function(caps, eps = 5, minPts = 20, delta_t = 400, ndraws = 5){
   
   # create a bunch of sets of parameters randomly.
-  comparison <- tibble(eps = sample(eps, ndraws, replace = TRUE),
-                       minpts = sample(minPts, ndraws, replace = TRUE),
-                       delta_t = sample(delta_t, ndraws, replace = TRUE),
-                       entr_t = sample(entr_t, ndraws, replace = TRUE)) %>%
+  tibble(
+    eps = rlnorm(ndraws, mean = log(eps), 2),
+    minpts = sample(1:minPts, ndraws, replace = TRUE),
+    delta_t = rexp(ndraws, 1 / delta_t),
+    entr_t = runif(ndraws, min = 1, max = 2.5)
+  ) %>%
     mutate(draw = row_number()) %>%
     rowwise() %>%
     mutate(params = param_packer(eps, minpts, delta_t, entr_t)) %>%
@@ -129,11 +139,6 @@ randomClusters <- function(caps, eps = c(1:40), minPts = c(1:10), delta_t = c(30
     mutate(
       clusters = map(params, caps_tr, caps = caps)
     )
-  
-  cluster_list <- lapply(comparison$params, function(p) {
-    str(p)
-    caps_tr(caps, p)
-  })
   
 }
 
