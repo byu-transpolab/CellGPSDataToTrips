@@ -123,11 +123,11 @@ param_packer <- function(x, y, z, q){
 #'   integer allowed
 #' @param delta_t parameter for generating time splits between activities. This 
 #'   is the arrival rate of a negative exponential function.
-randomClusters <- function(caps, eps = 5, minPts = 20, delta_t = 400, ndraws = 5){
+randomClusters <- function(caps, eps = 10, minPts = 20, delta_t = 400, ndraws = 5){
   
   # create a bunch of sets of parameters randomly.
   tibble(
-    eps = rlnorm(ndraws, mean = log(eps), 2),
+    eps = rlnorm(ndraws, mean = log(eps), 1),
     minpts = sample(1:minPts, ndraws, replace = TRUE),
     delta_t = rexp(ndraws, 1 / delta_t),
     entr_t = runif(ndraws, min = 1, max = 2.5)
