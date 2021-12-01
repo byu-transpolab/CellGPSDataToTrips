@@ -1,13 +1,11 @@
-source("R/gps2trips.R")
 
-library(targets)
-library(tidyverse)
 
-tar_load(clusters_per_date)
-
-makeRawDataMaps <- function(clusters_per_date) {
-  clusters_per_date <- clusters_per_date %>% dplyr::filter(date == date)
-  maps_per_date <- clusters_per_date %>%
+makeRawDataMaps <- function(caps, random_clusters) {
+  caps %>%
+    dplyr::filter(date == date)
+  maps_per_date <- caps %>% mutate(
+    clusters = random_clusters$clusters[1],
+    data = random_clusters[[7]][[1]]$data[1]) %>%
     mutate(
       blankMap = map2(data, clusters, ~ ggplot() +
                         annotation_map_tile(type = "cartolight", zoom = 12) 
@@ -20,10 +18,10 @@ makeRawDataMaps <- function(clusters_per_date) {
                           axis.text.x = element_blank(),
                           axis.text.y = element_blank()
                         )
-                      + geom_sf(data = .x, color = "blue")
+                      + geom_sf(data = .x, color = "blue") 
                       + labs(
                         title = "Raw GPS Data for",
-                        subtitle = activityDay,
+                        subtitle = date,
                         x = "Longitude",
                         y = "Latitude",
                       )
@@ -31,9 +29,9 @@ makeRawDataMaps <- function(clusters_per_date) {
     )
 }
 
-makeClusterMaps <- function(clusters_per_date) {
-  clusters_per_date <- clusters_per_date %>% dplyr::filter(date == date)
-  maps_per_date <- clusters_per_date %>%
+makeClusterMaps <- function(caps, random_clusters) {
+  random_clusters <- random_clusters %>% dplyr::filter(date == (random_clusters$clusters[[1]][[1]]))
+  maps_per_date <- random_clusters$clusters %>%
     mutate(
       clusterMap = map2(data, clusters, ~ ggplot() +
                           annotation_map_tile(type = "cartolight", zoom = 12) 

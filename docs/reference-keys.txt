@@ -1,8 +1,0 @@
-tab:datasummary
-eq:mnl
-question
-methods
-data
-models
-findings
-additional-analysis

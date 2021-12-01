@@ -26,8 +26,6 @@ journal: Submitted to Journal
 bibliography: book.bib
 biblio-style: apalike
 link-citations: yes
-abstract: |
-  This is where the abstract should go.
 description: A short description
 layout: 3p, authoryear
 keywords:
