@@ -1,8 +1,9 @@
 
 
 makeRawDataMaps <- function(caps, random_clusters) {
-  caps %>%
-    dplyr::filter(date == date)
+  caps <- caps %>%
+    dplyr::filter(date == date) %>%
+    filter(date == "2020-09-03")
   maps_per_date <- caps %>% mutate(
     clusters = random_clusters$clusters[1],
     data = random_clusters[[7]][[1]]$data[1]) %>%
