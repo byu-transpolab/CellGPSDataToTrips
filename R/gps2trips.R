@@ -129,7 +129,7 @@ randomClusters <- function(caps, eps = 10, minPts = 20, delta_t = 400, ndraws = 
   # create a bunch of sets of parameters randomly.
   tibble(
     eps = rlnorm(ndraws, mean = log(eps), 1),
-    minpts = sample(1:minPts, ndraws, replace = TRUE),
+    minpts = sample(3:minPts, ndraws, replace = TRUE),
     delta_t = rexp(ndraws, 1 / delta_t),
     entr_t = runif(ndraws, min = 1, max = 2.5)
   ) %>%
@@ -140,7 +140,6 @@ randomClusters <- function(caps, eps = 10, minPts = 20, delta_t = 400, ndraws = 
     mutate(
       clusters = map(params, caps_tr, caps = caps)
     )
-  
 }
 
 
