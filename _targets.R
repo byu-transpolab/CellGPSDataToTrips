@@ -12,7 +12,6 @@ list(
   tar_target(caps, makeCaps("data/SensorData-1596231685391.zip")),
   tar_target(random_clusters, randomClusters(caps[1:3,], eps = 40, minPts = 20, delta_t = 400, ndraws = 5)),
   tar_target(params, random_clusters$params),
-  # tar_target(raw_data_maps, makeRawDataMaps(caps = caps, random_clusters)),
   tar_target(manualTable, getGeoJson(folder = "manual_clusters")),
   tar_target(matchStats, calculateMatchStats(random_clusters, manualTable))
 )
