@@ -1,14 +1,40 @@
-source("R/gps2trips.R")
 
-library(targets)
-library(tidyverse)
+getGeoJson <- function(folder){
+  files <- dir(folder)
+  manualList <- lapply(files, function(file) {
+    st_read(file.path(folder, file))
+  }
+  )
+  tibble(date = as_date(substr(files, 1, 10)),
+         manual = manualList)
+}
 
-tar_load(raw_data_maps)
+calculateMatchStats <- function(random_clusters, manualTable) {
+    random_clusters_dataframe <- random_clusters %>%
+    mutate(
+      joined_clusters = map(clusters, getErrors, manualTable = manualTable)
+    ) %>% 
+    select(
+      eps, minpts, delta_t, entr_t, joined_clusters
+    ) %>%
+    unnest(cols = c(joined_clusters)) %>%
+      setDT()
+}
 
-comparison <- tibble(date = random_clusters[[7]][[1]]$date,
-                     algClusters = lapply(date, function(i){
-                       nrow((random_clusters[[7]][[1]]$clusters[i]))
-                     })
-)
+countClusters <- function(manual, clusters) {
+  nrow(manual) - nrow(clusters)
 
+}
+
+countClustersPct <- function(manual, clusters) {
+  (nrow(manual) - nrow(clusters)) / nrow(manual)
+}
+
+getErrors <- function(clusters, manualTable) {
+  inner_join(manualTable, clusters, by = "date") %>%
+    mutate(
+      error = map2(manual, clusters, countClusters),
+      pctError = map2(manual, clusters, countClustersPct)
+    )
+}
 
