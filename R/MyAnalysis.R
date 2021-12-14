@@ -38,3 +38,26 @@ getErrors <- function(clusters, manualTable) {
     )
 }
 
+pctErrorPlot <- function(matchStats) {
+  matchStatsErrorsOnly <- matchStats %>%
+    select(
+      date, eps, minpts, delta_t, entr_t, error, pctError)
+  # Make data long format
+  matchStatsLong <- melt(setDT(matchStatsErrorsOnly), id.vars = c("date", "error", "pctError"), variable.name = "parameters")
+  
+  # Plot percent Error
+   plot <- ggplot(matchStatsLong %>% filter(parameters == "delta_t"), aes(col = as.factor(date))) +
+    geom_point(aes(x = as.numeric(value), y = as.numeric(pctError))) +
+    labs(
+      x = "delta_t (seconds)",
+      y = "Error (%)"
+    ) +
+    guides(col = guide_legend(title = "Date"))+
+    theme_bw()
+   
+   # Interactive Plot
+   ggplotly(plot)
+}
+
+
+
