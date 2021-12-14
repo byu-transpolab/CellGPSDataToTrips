@@ -47,7 +47,9 @@ pctErrorPlot <- function(matchStats) {
   
   # Plot percent Error
    plot <- ggplot(matchStatsLong %>% filter(parameters == "delta_t"), aes(col = as.factor(date))) +
-    geom_point(aes(x = as.numeric(value), y = as.numeric(pctError))) +
+     geom_point(aes(x = as.numeric(value), y = as.numeric(pctError)), size = 3)+
+     geom_line(aes(x = as.numeric(value), y = as.numeric(pctError))) +
+    geom_smooth(aes(x = as.numeric(value), y = as.numeric(pctError)), method = 'lm', formula = y ~ x, se = F, col = "black") +
     labs(
       x = "delta_t (seconds)",
       y = "Error (%)"
