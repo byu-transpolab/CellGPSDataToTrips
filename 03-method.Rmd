@@ -1,3 +1,8 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
 # Methods
 
 ```{r setup2, include = FALSE}
@@ -44,55 +49,30 @@ if(knitr::is_latex_output()) {
 
 ## Data
 
-The GPS data used to determine the four most accurate parameters come from 60 volunteers in
-the Utah County area and were taken over a period of six or more months depending on the person. An example of what the raw GPS data looked like is shown in Figure 2.1.
-
-```{r Figure1, echo=FALSE, message=FALSE, warning=FALSE}
-rawData <- read_csv("data/Health Study_5f5184e73e2fd848eac22aec_passivelocation_57.csv")
-
-rawData <- head(rawData)
-
-rawData1 <- rawData %>%
-  select(accuracy, timestamp, speed, lat,lon, time)
-
-rawData1 %>%
-kbl(booktabs = T, caption = "Raw GPS Data", longtable = T) %>%
-  kable_styling(full_width = F)
-
-```
-
-Before the GPS data can be processed, it had to be cleaned and reformatted. Since a DBSCAN algorithm is being used, the speed variable was removed completely. From there, the dates and times had to be reformatted using functions from the **lubridate** package in R and by writing a "Yesterday" function with output "ActivityDay" that defines activity days as being from 3 AM to 3 AM instead of 12 AM to 12 AM. This was done because many respondents are college students, so they are likely to make trips after midnight. Table 2.2 shows what the cleaned data looked like.
-
-```{r Figure2, echo=FALSE, message=FALSE, warning=FALSE}
-source("R/gps2trips.R")
-
-cleaned_data <- makeCaps("data") %>%
-  select(lat,lon,timestamp,date,time,activityDay)
-cleaned_data <- head(cleaned_data)
-
-cleaned_data %>%
-kbl(booktabs = T, caption = "Cleaned GPS Data", longtable = T) %>%
-  kable_styling(full_width = F)
-
-```
-
+The GPS data used to determine the most accurate delta_t parameter came from one volunteer in
+the Utah County area and was taken over a period of six months. For the purposes of this question, only 10 days worth of GPS data will be processed.
 
 ## Models
 
-Once the data is cleaned and properly formatted, it is run through a DBSCAN-entropy hybrid algorithm largely based on the method created by Gong et al. in 2018 [@GongInspiration]. After the DBSCAN algorithm determines how many total clusters there are based on the eps and minpts parameters, they get further split based on the delta_t parameter if necessary. If the time difference between points at the same place is greater than delta_t, then the points will be split into two separate clusters or activities. 
+Ultimately, to choose the most accurate delta_t parameter, the number of clusters calculated by the algorithm (algorithm clusters) was compared to the number of clusters it appeared there should be for that day (manual clusters). The method for how those clusters were created are described below.
 
-Finally, there is an entropy calculation step where entropy is determined by the change in departure angle between consecutive points. The equation for this entropy is shown in the equation below [@GongInspiration]. If the points are in a line, the entropy is very low. In this algorithm, the entr_t parameter determines at which entropy someone is actually likely to be moving and not just at a stoplight, etc.
+### Algorithm Clusters
 
-\begin{equation}
-  EI_q = -\sum_{d=1}^D ((\frac{n_d}{N})ln(\frac{n_d}{N}))
-\end{equation}
+Once the data was cleaned and properly formatted, it was run through a DBSCAN-entropy hybrid algorithm largely based on the method created by Gong et al. in 2018 [@GongInspiration]. The concepts from Gong's DBSCAN-Entropy algorithm were taken and written in R using the *dbscan* package [@dbscanR] and a new *gpsactivs* package written by Dr. Gregory Macfarlane that has yet to be published to CRAN for public use. 
 
-For this experiment, I will look at a map of the unprocessed, cleaned data and determine with my eyes how many clusters there are. Then, the hybrid algorithm will calculate the number of clusters using randomized values for the four parameters. Based on all the previous research that has been discussed, the ranges for the possible parameters are as follows:
+For this algorithm, the four parameters of minpts, eps, entr_t, delta_t are required. Based on the current literature, the three constant parameters were set as follows:
 
-minpts: (3,10)
-eps: (1,50)
-delta_t: (300, 1500) seconds
-entr_t: (0.5,3)
+* mintpts = 3
+  
+* eps = 25 meters
+  
+* entr_t = 1.0
+  
+To compare the accuracies of different delta_t parameters, 20 draws were done for each of the 10 days. Each draw kept the same constant parameters as listed above, and the delta_t parameter was randomly selected from a range of 1 to 400 seconds. By the end of running this algorithm, each of the 10 days had 20 outputs for the number of clusters as determined by the randomly selected delta_t parameter.
 
-Then, I will compare the amount of clusters I saw to the number of clusters the hybrid algorithm calculated. This process was repeated 5 times over 10 different days in order to determine which parameters are the most accurate.
+### Manual Clusters
+
+To get the number of "manual clusters" per day, maps of the raw GPS data were created using the *sf* package in R [@sfR]. Those maps were then referenced as the researchers made their own GeoJSON files that stored the geometric locations of where potential trips looked like they were happening. One GeoJSON file was created for each day. 
+
+Finally those GeoJSON files were read into R and appended onto the table including the algorithm's calculated number of clusters. For each of the 10 days, the 20 algorithm possibilities for number of clusters was compared to the number of manual clusters picked in the GeoJSON files. From this, the percent error was calculated and the delta_t parameter that consistently gave the lowest error across all 10 days was deemed to be the most accurate delta_t parameter to use in this DBSCAN-Entropy Algorithm.
 

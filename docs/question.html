@@ -5,25 +5,25 @@
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <title>Determining DBSCAN-Entrpopy Hybrid Algorithm Parameters for Converting GPS Points to Activities</title>
-  <meta name="description" content="A short description" />
+  <meta name="description" content="Test" />
   <meta name="generator" content="bookdown 0.24 and GitBook 2.6.7" />
 
   <meta property="og:title" content="Determining DBSCAN-Entrpopy Hybrid Algorithm Parameters for Converting GPS Points to Activities" />
   <meta property="og:type" content="book" />
   
   
-  <meta property="og:description" content="A short description" />
+  <meta property="og:description" content="Test" />
   
 
   <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content="Determining DBSCAN-Entrpopy Hybrid Algorithm Parameters for Converting GPS Points to Activities" />
   
-  <meta name="twitter:description" content="A short description" />
+  <meta name="twitter:description" content="Test" />
   
 
 
 
-<meta name="date" content="2021-11-30" />
+<meta name="date" content="2021-12-15" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -52,8 +52,13 @@
 
 <link href="libs/anchor-sections-1.0.1/anchor-sections.css" rel="stylesheet" />
 <script src="libs/anchor-sections-1.0.1/anchor-sections.js"></script>
-<script src="libs/kePrint-0.0.1/kePrint.js"></script>
-<link href="libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
+<script src="libs/htmlwidgets-1.5.4/htmlwidgets.js"></script>
+<script src="libs/plotly-binding-4.10.0/plotly.js"></script>
+<script src="libs/typedarray-0.1/typedarray.min.js"></script>
+<link href="libs/crosstalk-1.1.1/css/crosstalk.css" rel="stylesheet" />
+<script src="libs/crosstalk-1.1.1/js/crosstalk.min.js"></script>
+<link href="libs/plotly-htmlwidgets-css-2.5.1/plotly-htmlwidgets.css" rel="stylesheet" />
+<script src="libs/plotly-main-2.5.1/plotly-latest.min.js"></script>
 
 
 
@@ -100,7 +105,11 @@ div.csl-indent {
 <li class="chapter" data-level="2" data-path="methods.html"><a href="methods.html"><i class="fa fa-check"></i><b>2</b> Methods</a>
 <ul>
 <li class="chapter" data-level="2.1" data-path="methods.html"><a href="methods.html#data"><i class="fa fa-check"></i><b>2.1</b> Data</a></li>
-<li class="chapter" data-level="2.2" data-path="methods.html"><a href="methods.html#models"><i class="fa fa-check"></i><b>2.2</b> Models</a></li>
+<li class="chapter" data-level="2.2" data-path="methods.html"><a href="methods.html#models"><i class="fa fa-check"></i><b>2.2</b> Models</a>
+<ul>
+<li class="chapter" data-level="2.2.1" data-path="methods.html"><a href="methods.html#algorithm-clusters"><i class="fa fa-check"></i><b>2.2.1</b> Algorithm Clusters</a></li>
+<li class="chapter" data-level="2.2.2" data-path="methods.html"><a href="methods.html#manual-clusters"><i class="fa fa-check"></i><b>2.2.2</b> Manual Clusters</a></li>
+</ul></li>
 </ul></li>
 <li class="chapter" data-level="3" data-path="findings.html"><a href="findings.html"><i class="fa fa-check"></i><b>3</b> Findings</a></li>
 <li class="chapter" data-level="" data-path="acknowledgements.html"><a href="acknowledgements.html"><i class="fa fa-check"></i>Acknowledgements</a></li>
@@ -137,15 +146,16 @@ Brigham Young University<br>
 Brigham Young University<br>
 <a class="author_email" href="mailto:#"><a href="mailto:gregmacfarlane@byu.edu" class="email">gregmacfarlane@byu.edu</a></a>
 </address>
-<p class="date"><em>2021-11-30</em></p>
+<p class="date"><em>2021-12-15</em></p>
 </div>
 <div id="question" class="section level1" number="1">
 <h1><span class="header-section-number"> 1</span> Question</h1>
-<p>Global Positioning System (GPS) surveys have become a more accurate and reputable alternative to previous travel survey methods that collect activity-travel patterns. Despite GPS devices’ ability to record time and positional characteristics, they still require two steps, cleaning and processing, in order to convert the positional characteristics into trip purposes and activities.</p>
-<p>Currently, many researchers use time and speed rule-based algorithms to define when and where activities occur <span class="citation">(<a href="#ref-reviewOfMethods2014" role="doc-biblioref">Shen and Stopher 2014</a>)</span>. Due to their subjective nature, these rules are not ideal. For example, people walk at different speeds, so the speed threshold at which someone is considered stagnant would require manual changing from person to person. If not changed, the number of activities for each person could be misleading and inaccurate. These issues may explain why rule-based algorithms’ accuracies typically range from 43% to 61% <span class="citation">(<a href="#ref-reviewOfMethods2014" role="doc-biblioref">Shen and Stopher 2014</a>)</span>. While these processing results (Step 2) are not ideal, the data-cleaning method (Step 1) still serves as a reputable guide regardless of the processing method.</p>
-<p>Therefore, once the data is cleaned with accordance to rule-based algorithm methods, a DBSCAN and entropy based algorithm should be applied for the processing step. In this type of algorithm, four parameters are needed to determine an activity: minimum number of points (minpts) within a predefined radius (eps) with a minimum amount of entropy (entr_t) <span class="citation">(<a href="#ref-GongInspiration" role="doc-biblioref">Gong L. 2018</a>)</span>, and after a certain period of time from the previous activity (delta_t) . When selected properly, these parameters will not need to change from person to person and therefore often lead to more accurate activity counts. In fact, one experiment <span class="citation">(<a href="#ref-DBAlgorithm2017" role="doc-biblioref">Luo et al. 2017</a>)</span> using just a DBSCAN cluster-based algorithms proved to be 92% precise.</p>
-<p>One way to select the minPoints and radius (eps) thresholds is to arbitrarily pick the minPoints based on how large the data set is (with a minimum of three) and then set k = minPts in a k-distance plot <span class="citation">(<a href="#ref-RKNNMethod2018" role="doc-biblioref">Kassambara 2018</a>)</span>. Good values of the radius value is where the k-distance plot shows a strong bend. Another method involves calculating the arithmetic mean and standard deviation of a synthetic GPS trajectory, and subject those values to a Gaussian curve equation to solve for eps given an arbitrary minPts <span class="citation">(<a href="#ref-GaussianMethod2009" role="doc-biblioref">Xiu-Li and Wei-Xiang 2009</a>)</span>. Unfortunately, these methods only work in a pure DBSCAN algorithm where only minpts and eps are accounted for, not entr_t and delta_t.</p>
-<p>Hence, the purpose of this paper is to explore a method of how to simultaneously select all four parameters as accurately as possible in a DBSCAN entropy based algorithm after the GPS data has been cleaned.</p>
+<p>Global Positioning System (GPS) surveys have become a more accurate and reputable alternative to previous travel survey methods that collect activity-travel patterns. Despite GPS devices’ ability to record time and positional characteristics, further processing is required to determine the number of trips.</p>
+<p>A DBSCAN algorithm (Density-Based Spatial Clustering of Applications with Noise) is one of the most accurate ways to process GPS data because it “overcome[s] some inherent limitations of partitioning and hierarchical algorithms”<span class="citation">(<a href="#ref-DBSCANWeb2019" role="doc-biblioref">Kefanjin 2019</a>)</span>. In fact, one experiment <span class="citation">(<a href="#ref-DBAlgorithm2017" role="doc-biblioref">Luo et al. 2017</a>)</span> using just a DBSCAN cluster-based algorithms proved to be 92% precise which is significantly better than the typical 43% to 61% reported from using rule-based algorithms <span class="citation">(<a href="#ref-reviewOfMethods2014" role="doc-biblioref">Shen and Stopher 2014</a>)</span>.</p>
+<p>If one wishes to remove error even further, entropy (the chaotic movement betwen points in a cluster) can be added to the DBSCAN algorithm as done by Gong et al. in 2018 (<span class="citation">(<a href="#ref-GongInspiration" role="doc-biblioref">Gong L. 2018</a>)</span>). Including entropy removes inaccuracies that come from situations like a stoplight being mistaken as its own trip.</p>
+<p>For a DBSCAN-Entropy Algorithm to work, four parameters are required: minimum number of points to be considered a cluster (minpts), radius in which those minpts can occur in (eps), the entropy threshold (entr_t), and the time threshold in which one trip is considered two trips at the same location (delta_t).</p>
+<p>One common way to select the minpts and radius (eps) thresholds is to arbitrarily pick the minpts based on how large the data set is (with a minimum of three) and then set k = minPts in a k-distance plot <span class="citation">(<a href="#ref-RKNNMethod2018" role="doc-biblioref">Kassambara 2018</a>)</span> to find eps. Unfortunately, this method only works in a pure DBSCAN algorithm where only minpts and eps are accounted for, not entr_t and delta_t. Gong et al. (2018) was able to determine an accurate entr_t threshold: . However, delta_t is still arbitrarily chosen and not as much research or experiments have been done to determine an accurate delta_t.</p>
+<p>Hence, the purpose of this paper is to explore a method of how to select an accurate delta_t parameter to use in a DBSCAN-Entropy Algorithm while keeping the other three parameters constant.</p>
 
 </div>
 <h3>References</h3>
@@ -156,14 +166,14 @@ Gong L., Morikawa T, Yamamoto T. 2018. <span>“Identification of Activity Stop 
 <div id="ref-RKNNMethod2018" class="csl-entry">
 Kassambara, Alboukadel. 2018. <span>“DBSCAN: Density-Based Clustering Essentials.”</span> <em>DataNovia</em>. <a href="https://www.datanovia.com/en/lessons/dbscan-density-based-clustering-essentials/">https://www.datanovia.com/en/lessons/dbscan-density-based-clustering-essentials/</a>.
 </div>
+<div id="ref-DBSCANWeb2019" class="csl-entry">
+Kefanjin. 2019. <span>“DBSCAN: Density-Based Clustering.”</span> <em>DataScience/MachineLearning</em>. <a href="https://ospinaforerolab.home.blog/2019/07/28/chapter-3-dbscan-density-based-clustering/">https://ospinaforerolab.home.blog/2019/07/28/chapter-3-dbscan-density-based-clustering/</a>.
+</div>
 <div id="ref-DBAlgorithm2017" class="csl-entry">
 Luo, Ting, Xinwei Zheng, Guangluan Xu, Kun Fu, and Wenjuan Ren. 2017. <span>“An Improved DBSCAN Algorithm to Detect Stops in Individual Trajectories.”</span> <em>ISPRS International Journal of Geo-Information</em> 6 (3). <a href="https://doi.org/10.3390/ijgi6030063">https://doi.org/10.3390/ijgi6030063</a>.
 </div>
 <div id="ref-reviewOfMethods2014" class="csl-entry">
 Shen, Li, and Peter R. Stopher. 2014. <span>“Review of GPS Travel Survey and GPS Data-Processing Methods.”</span> <em>Transport Reviews</em> 34 (3): 316–34. <a href="https://doi.org/10.1080/01441647.2014.903530">https://doi.org/10.1080/01441647.2014.903530</a>.
-</div>
-<div id="ref-GaussianMethod2009" class="csl-entry">
-Xiu-Li, Zhao, and Xu Wei-Xiang. 2009. <span>“A Clustering-Based Approach for Discovering Interesting Places in a Single Trajectory”</span> 3: 429–32. <a href="https://doi.org/10.1109/ICICTA.2009.569">https://doi.org/10.1109/ICICTA.2009.569</a>.
 </div>
 </div>
             </section>
@@ -226,20 +236,6 @@ gitbook.start({
 });
 </script>
 
-<!-- dynamically load mathjax for compatibility with self-contained -->
-<script>
-  (function () {
-    var script = document.createElement("script");
-    script.type = "text/javascript";
-    var src = "true";
-    if (src === "" || src === "true") src = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML";
-    if (location.protocol !== "file:")
-      if (/^https?:/.test(src))
-        src = src.replace(/^https?:/, '');
-    script.src = src;
-    document.getElementsByTagName("head")[0].appendChild(script);
-  })();
-</script>
 </body>
 
 </html>

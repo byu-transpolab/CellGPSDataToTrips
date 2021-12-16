@@ -5,25 +5,25 @@
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <title> 2 Methods | Determining DBSCAN-Entrpopy Hybrid Algorithm Parameters for Converting GPS Points to Activities</title>
-  <meta name="description" content="A short description" />
+  <meta name="description" content="Test" />
   <meta name="generator" content="bookdown 0.24 and GitBook 2.6.7" />
 
   <meta property="og:title" content=" 2 Methods | Determining DBSCAN-Entrpopy Hybrid Algorithm Parameters for Converting GPS Points to Activities" />
   <meta property="og:type" content="book" />
   
   
-  <meta property="og:description" content="A short description" />
+  <meta property="og:description" content="Test" />
   
 
   <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content=" 2 Methods | Determining DBSCAN-Entrpopy Hybrid Algorithm Parameters for Converting GPS Points to Activities" />
   
-  <meta name="twitter:description" content="A short description" />
+  <meta name="twitter:description" content="Test" />
   
 
 
 
-<meta name="date" content="2021-11-30" />
+<meta name="date" content="2021-12-15" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -52,8 +52,13 @@
 
 <link href="libs/anchor-sections-1.0.1/anchor-sections.css" rel="stylesheet" />
 <script src="libs/anchor-sections-1.0.1/anchor-sections.js"></script>
-<script src="libs/kePrint-0.0.1/kePrint.js"></script>
-<link href="libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
+<script src="libs/htmlwidgets-1.5.4/htmlwidgets.js"></script>
+<script src="libs/plotly-binding-4.10.0/plotly.js"></script>
+<script src="libs/typedarray-0.1/typedarray.min.js"></script>
+<link href="libs/crosstalk-1.1.1/css/crosstalk.css" rel="stylesheet" />
+<script src="libs/crosstalk-1.1.1/js/crosstalk.min.js"></script>
+<link href="libs/plotly-htmlwidgets-css-2.5.1/plotly-htmlwidgets.css" rel="stylesheet" />
+<script src="libs/plotly-main-2.5.1/plotly-latest.min.js"></script>
 
 
 
@@ -100,7 +105,11 @@ div.csl-indent {
 <li class="chapter" data-level="2" data-path="methods.html"><a href="methods.html"><i class="fa fa-check"></i><b>2</b> Methods</a>
 <ul>
 <li class="chapter" data-level="2.1" data-path="methods.html"><a href="methods.html#data"><i class="fa fa-check"></i><b>2.1</b> Data</a></li>
-<li class="chapter" data-level="2.2" data-path="methods.html"><a href="methods.html#models"><i class="fa fa-check"></i><b>2.2</b> Models</a></li>
+<li class="chapter" data-level="2.2" data-path="methods.html"><a href="methods.html#models"><i class="fa fa-check"></i><b>2.2</b> Models</a>
+<ul>
+<li class="chapter" data-level="2.2.1" data-path="methods.html"><a href="methods.html#algorithm-clusters"><i class="fa fa-check"></i><b>2.2.1</b> Algorithm Clusters</a></li>
+<li class="chapter" data-level="2.2.2" data-path="methods.html"><a href="methods.html#manual-clusters"><i class="fa fa-check"></i><b>2.2.2</b> Manual Clusters</a></li>
+</ul></li>
 </ul></li>
 <li class="chapter" data-level="3" data-path="findings.html"><a href="findings.html"><i class="fa fa-check"></i><b>3</b> Findings</a></li>
 <li class="chapter" data-level="" data-path="acknowledgements.html"><a href="acknowledgements.html"><i class="fa fa-check"></i>Acknowledgements</a></li>
@@ -129,328 +138,41 @@ div.csl-indent {
 <h1><span class="header-section-number"> 2</span> Methods</h1>
 <div id="data" class="section level2" number="2.1">
 <h2><span class="header-section-number">2.1</span> Data</h2>
-<p>The GPS data used to determine the four most accurate parameters come from 60 volunteers in
-the Utah County area and were taken over a period of six or more months depending on the person. An example of what the raw GPS data looked like is shown in Figure 2.1.</p>
-<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<caption>
-<span id="tab:Figure1">Table 2.1: </span>Raw GPS Data
-</caption>
-<thead>
-<tr>
-<th style="text-align:right;">
-accuracy
-</th>
-<th style="text-align:left;">
-timestamp
-</th>
-<th style="text-align:right;">
-speed
-</th>
-<th style="text-align:right;">
-lat
-</th>
-<th style="text-align:right;">
-lon
-</th>
-<th style="text-align:right;">
-time
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:right;">
-16
-</td>
-<td style="text-align:left;">
-2021-03-17 22:59:36
-</td>
-<td style="text-align:right;">
--1
-</td>
-<td style="text-align:right;">
-40.25293
-</td>
-<td style="text-align:right;">
--111.6602
-</td>
-<td style="text-align:right;">
-1.616044e+12
-</td>
-</tr>
-<tr>
-<td style="text-align:right;">
-16
-</td>
-<td style="text-align:left;">
-2021-03-17 22:59:37
-</td>
-<td style="text-align:right;">
--1
-</td>
-<td style="text-align:right;">
-40.25293
-</td>
-<td style="text-align:right;">
--111.6602
-</td>
-<td style="text-align:right;">
-1.616044e+12
-</td>
-</tr>
-<tr>
-<td style="text-align:right;">
-16
-</td>
-<td style="text-align:left;">
-2021-03-17 22:59:38
-</td>
-<td style="text-align:right;">
--1
-</td>
-<td style="text-align:right;">
-40.25293
-</td>
-<td style="text-align:right;">
--111.6602
-</td>
-<td style="text-align:right;">
-1.616044e+12
-</td>
-</tr>
-<tr>
-<td style="text-align:right;">
-16
-</td>
-<td style="text-align:left;">
-2021-03-17 22:59:39
-</td>
-<td style="text-align:right;">
--1
-</td>
-<td style="text-align:right;">
-40.25293
-</td>
-<td style="text-align:right;">
--111.6602
-</td>
-<td style="text-align:right;">
-1.616044e+12
-</td>
-</tr>
-<tr>
-<td style="text-align:right;">
-16
-</td>
-<td style="text-align:left;">
-2021-03-17 22:59:40
-</td>
-<td style="text-align:right;">
--1
-</td>
-<td style="text-align:right;">
-40.25293
-</td>
-<td style="text-align:right;">
--111.6602
-</td>
-<td style="text-align:right;">
-1.616044e+12
-</td>
-</tr>
-<tr>
-<td style="text-align:right;">
-16
-</td>
-<td style="text-align:left;">
-2021-03-17 22:59:41
-</td>
-<td style="text-align:right;">
--1
-</td>
-<td style="text-align:right;">
-40.25293
-</td>
-<td style="text-align:right;">
--111.6602
-</td>
-<td style="text-align:right;">
-1.616044e+12
-</td>
-</tr>
-</tbody>
-</table>
-<p>Before the GPS data can be processed, it had to be cleaned and reformatted. Since a DBSCAN algorithm is being used, the speed variable was removed completely. From there, the dates and times had to be reformatted using functions from the <strong>lubridate</strong> package in R and by writing a “Yesterday” function with output “ActivityDay” that defines activity days as being from 3 AM to 3 AM instead of 12 AM to 12 AM. This was done because many respondents are college students, so they are likely to make trips after midnight. Table 2.2 shows what the cleaned data looked like.</p>
-<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<caption>
-<span id="tab:Figure2">Table 2.2: </span>Cleaned GPS Data
-</caption>
-<thead>
-<tr>
-<th style="text-align:right;">
-lat
-</th>
-<th style="text-align:right;">
-lon
-</th>
-<th style="text-align:left;">
-timestamp
-</th>
-<th style="text-align:left;">
-date
-</th>
-<th style="text-align:left;">
-time
-</th>
-<th style="text-align:left;">
-activityDay
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:right;">
-40.25293
-</td>
-<td style="text-align:right;">
--111.6602
-</td>
-<td style="text-align:left;">
-2021-03-17 22:59:36
-</td>
-<td style="text-align:left;">
-2021-03-17
-</td>
-<td style="text-align:left;">
-22:59:36
-</td>
-<td style="text-align:left;">
-17-3
-</td>
-</tr>
-<tr>
-<td style="text-align:right;">
-40.25293
-</td>
-<td style="text-align:right;">
--111.6602
-</td>
-<td style="text-align:left;">
-2021-03-17 22:59:37
-</td>
-<td style="text-align:left;">
-2021-03-17
-</td>
-<td style="text-align:left;">
-22:59:37
-</td>
-<td style="text-align:left;">
-17-3
-</td>
-</tr>
-<tr>
-<td style="text-align:right;">
-40.25293
-</td>
-<td style="text-align:right;">
--111.6602
-</td>
-<td style="text-align:left;">
-2021-03-17 22:59:38
-</td>
-<td style="text-align:left;">
-2021-03-17
-</td>
-<td style="text-align:left;">
-22:59:38
-</td>
-<td style="text-align:left;">
-17-3
-</td>
-</tr>
-<tr>
-<td style="text-align:right;">
-40.25293
-</td>
-<td style="text-align:right;">
--111.6602
-</td>
-<td style="text-align:left;">
-2021-03-17 22:59:39
-</td>
-<td style="text-align:left;">
-2021-03-17
-</td>
-<td style="text-align:left;">
-22:59:39
-</td>
-<td style="text-align:left;">
-17-3
-</td>
-</tr>
-<tr>
-<td style="text-align:right;">
-40.25293
-</td>
-<td style="text-align:right;">
--111.6602
-</td>
-<td style="text-align:left;">
-2021-03-17 22:59:40
-</td>
-<td style="text-align:left;">
-2021-03-17
-</td>
-<td style="text-align:left;">
-22:59:40
-</td>
-<td style="text-align:left;">
-17-3
-</td>
-</tr>
-<tr>
-<td style="text-align:right;">
-40.25293
-</td>
-<td style="text-align:right;">
--111.6602
-</td>
-<td style="text-align:left;">
-2021-03-17 22:59:41
-</td>
-<td style="text-align:left;">
-2021-03-17
-</td>
-<td style="text-align:left;">
-22:59:41
-</td>
-<td style="text-align:left;">
-17-3
-</td>
-</tr>
-</tbody>
-</table>
+<p>The GPS data used to determine the most accurate delta_t parameter came from one volunteer in
+the Utah County area and was taken over a period of six months. For the purposes of this question, only 10 days worth of GPS data will be processed.</p>
 </div>
 <div id="models" class="section level2" number="2.2">
 <h2><span class="header-section-number">2.2</span> Models</h2>
-<p>Once the data is cleaned and properly formatted, it is run through a DBSCAN-entropy hybrid algorithm largely based on the method created by Gong et al. in 2018 <span class="citation">(<a href="#ref-GongInspiration" role="doc-biblioref">Gong L. 2018</a>)</span>. After the DBSCAN algorithm determines how many total clusters there are based on the eps and minpts parameters, they get further split based on the delta_t parameter if necessary. If the time difference between points at the same place is greater than delta_t, then the points will be split into two separate clusters or activities.</p>
-<p>Finally, there is an entropy calculation step where entropy is determined by the change in departure angle between consecutive points. The equation for this entropy is shown in the equation below <span class="citation">(<a href="#ref-GongInspiration" role="doc-biblioref">Gong L. 2018</a>)</span>. If the points are in a line, the entropy is very low. In this algorithm, the entr_t parameter determines at which entropy someone is actually likely to be moving and not just at a stoplight, etc.</p>
-<p><span class="math display">\[\begin{equation}
-  EI_q = -\sum_{d=1}^D ((\frac{n_d}{N})ln(\frac{n_d}{N}))
-\end{equation}\]</span></p>
-<p>For this experiment, I will look at a map of the unprocessed, cleaned data and determine with my eyes how many clusters there are. Then, the hybrid algorithm will calculate the number of clusters using randomized values for the four parameters. Based on all the previous research that has been discussed, the ranges for the possible parameters are as follows:</p>
-<p>minpts: (3,10)
-eps: (1,50)
-delta_t: (300, 1500) seconds
-entr_t: (0.5,3)</p>
-<p>Then, I will compare the amount of clusters I saw to the number of clusters the hybrid algorithm calculated. This process was repeated 5 times over 10 different days in order to determine which parameters are the most accurate.</p>
+<p>Ultimately, to choose the most accurate delta_t parameter, the number of clusters calculated by the algorithm (algorithm clusters) was compared to the number of clusters it appeared there should be for that day (manual clusters). The method for how those clusters were created are described below.</p>
+<div id="algorithm-clusters" class="section level3" number="2.2.1">
+<h3><span class="header-section-number">2.2.1</span> Algorithm Clusters</h3>
+<p>Once the data was cleaned and properly formatted, it was run through a DBSCAN-entropy hybrid algorithm largely based on the method created by Gong et al. in 2018 <span class="citation">(<a href="#ref-GongInspiration" role="doc-biblioref">Gong L. 2018</a>)</span>. The concepts from Gong’s DBSCAN-Entropy algorithm were taken and written in R using the <em>dbscan</em> package <span class="citation">(<a href="#ref-dbscanR" role="doc-biblioref">Hahsler 2021</a>)</span> and a new <em>gpsactivs</em> package written by Dr. Gregory Macfarlane that has yet to be published to CRAN for public use.</p>
+<p>For this algorithm, the four parameters of minpts, eps, entr_t, delta_t are required. Based on the current literature, the three constant parameters were set as follows:</p>
+<ul>
+<li><p>mintpts = 3</p></li>
+<li><p>eps = 25 meters</p></li>
+<li><p>entr_t = 1.0</p></li>
+</ul>
+<p>To compare the accuracies of different delta_t parameters, 20 draws were done for each of the 10 days. Each draw kept the same constant parameters as listed above, and the delta_t parameter was randomly selected from a range of 1 to 400 seconds. By the end of running this algorithm, each of the 10 days had 20 outputs for the number of clusters as determined by the randomly selected delta_t parameter.</p>
+</div>
+<div id="manual-clusters" class="section level3" number="2.2.2">
+<h3><span class="header-section-number">2.2.2</span> Manual Clusters</h3>
+<p>To get the number of “manual clusters” per day, maps of the raw GPS data were created using the <em>sf</em> package in R <span class="citation">(<a href="#ref-sfR" role="doc-biblioref">Pebesma et al. 2021</a>)</span>. Those maps were then referenced as the researchers made their own GeoJSON files that stored the geometric locations of where potential trips looked like they were happening. One GeoJSON file was created for each day.</p>
+<p>Finally those GeoJSON files were read into R and appended onto the table including the algorithm’s calculated number of clusters. For each of the 10 days, the 20 algorithm possibilities for number of clusters was compared to the number of manual clusters picked in the GeoJSON files. From this, the percent error was calculated and the delta_t parameter that consistently gave the lowest error across all 10 days was deemed to be the most accurate delta_t parameter to use in this DBSCAN-Entropy Algorithm.</p>
 
+</div>
 </div>
 </div>
 <h3>References</h3>
 <div id="refs" class="references csl-bib-body hanging-indent">
 <div id="ref-GongInspiration" class="csl-entry">
 Gong L., Morikawa T, Yamamoto T. 2018. <span>“Identification of Activity Stop Locations in GPS Trajectories by DBSCAN-TE Method Combined with Support Vector Machines.”</span> <em>Transportation Research Procedia</em>. <a href="https://doi.org/10.1016/J.TRPRO.2018.10.028">https://doi.org/10.1016/J.TRPRO.2018.10.028</a>.
+</div>
+<div id="ref-dbscanR" class="csl-entry">
+Hahsler, Michale. 2021. <em>Dbscan: Density Based Clustering of Applications with Noise (DBSCAN) and Related Algorithms</em>.
+</div>
+<div id="ref-sfR" class="csl-entry">
+Pebesma, Edzer, Roger Bivand, Jeroen Ooms, and Dewey Dunnington. 2021. <em>Sf: Simple Features for r</em>.
 </div>
 </div>
             </section>
@@ -513,20 +235,6 @@ gitbook.start({
 });
 </script>
 
-<!-- dynamically load mathjax for compatibility with self-contained -->
-<script>
-  (function () {
-    var script = document.createElement("script");
-    script.type = "text/javascript";
-    var src = "true";
-    if (src === "" || src === "true") src = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML";
-    if (location.protocol !== "file:")
-      if (/^https?:/.test(src))
-        src = src.replace(/^https?:/, '');
-    script.src = src;
-    document.getElementsByTagName("head")[0].appendChild(script);
-  })();
-</script>
 </body>
 
 </html>

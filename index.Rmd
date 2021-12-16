@@ -26,7 +26,7 @@ journal: Submitted to Journal
 bibliography: book.bib
 biblio-style: apalike
 link-citations: yes
-description: A short description
+description: Test
 layout: 3p, authoryear
 keywords:
 - GPS Data, Trips, Clusters

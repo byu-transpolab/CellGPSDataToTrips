@@ -46,7 +46,7 @@ pctErrorPlot <- function(matchStats) {
   matchStatsLong <- melt(setDT(matchStatsErrorsOnly), id.vars = c("date", "error", "pctError"), variable.name = "parameters")
   
   # Plot percent Error
-   plot <- ggplot(matchStatsLong %>% filter(parameters == "delta_t"), aes(col = as.factor(date))) +
+   plot <- ggplot(matchStatsLong %>% filter(parameters == "delta_t", value <= 400), aes(col = as.factor(date))) +
      geom_point(aes(x = as.numeric(value), y = as.numeric(pctError)), size = 3)+
      geom_line(aes(x = as.numeric(value), y = as.numeric(pctError))) +
     geom_smooth(aes(x = as.numeric(value), y = as.numeric(pctError)), method = 'lm', formula = y ~ x, se = F, col = "black") +
@@ -60,6 +60,4 @@ pctErrorPlot <- function(matchStats) {
    # Interactive Plot
    ggplotly(plot)
 }
-
-
 
