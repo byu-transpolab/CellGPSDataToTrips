@@ -1,7 +1,6 @@
 library(targets)
 
 source("R/gps2trips.R")
-source("R/MakeMaps.R")
 source("R/MyAnalysis.R")
 
 # Set target-specific options such as packages.
