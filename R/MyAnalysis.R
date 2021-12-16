@@ -1,4 +1,7 @@
-
+#' @param folder of GeoJSON files named by date in same format as caps
+#' @return tibble of list of manual clusters
+#' @details caps can be made and loaded using the _targets.R file
+#' 
 getGeoJson <- function(folder){
   files <- dir(folder)
   manualList <- lapply(files, function(file) {
@@ -9,6 +12,10 @@ getGeoJson <- function(folder){
          manual = manualList)
 }
 
+#' @param random_clusters and manualTable targets
+#' @return list of manual and algorithm clusters with errors, dates, and params
+#' @details the output of this is also the matchStats target
+#' 
 calculateMatchStats <- function(random_clusters, manualTable) {
     random_clusters_dataframe <- random_clusters %>%
     mutate(
@@ -21,15 +28,24 @@ calculateMatchStats <- function(random_clusters, manualTable) {
       setDT()
 }
 
+#' @param lists of manual clusters and algorithm clusters
+#' @return integer error value
+#' 
 countClusters <- function(manual, clusters) {
   nrow(manual) - nrow(clusters)
 
 }
 
+#' @param lists of manual clusters and algorithm clusters
+#' @return percent error value
+#' 
 countClustersPct <- function(manual, clusters) {
   (nrow(manual) - nrow(clusters)) / nrow(manual)
 }
 
+#' @param tibble of manual clusters and algorithm clusters
+#' @return tibble including error integer and percent error
+#' @details calculates the errors that get appended in the getMatchStats function
 getErrors <- function(clusters, manualTable) {
   inner_join(manualTable, clusters, by = "date") %>%
     mutate(
@@ -38,6 +54,9 @@ getErrors <- function(clusters, manualTable) {
     )
 }
 
+#' @param matchStats target which is a list
+#' @return interactive line plot of delta_t vs. percent error
+#' @details includes a line of best fit/ trend line
 pctErrorPlot <- function(matchStats) {
   matchStatsErrorsOnly <- matchStats %>%
     select(
