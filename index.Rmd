@@ -27,8 +27,15 @@ bibliography: book.bib
 biblio-style: apalike
 link-citations: yes
 description: Test
+always_allow_html: yes
 layout: 3p, authoryear
+abstract: |
+  DBSCAN Entropy algorithms appear to be the most accurate way to process the GPS data into trips/activities. This algorithm takes
+  four parameters to work: minimum number of points (minpts), radius for those points (eps), entropy threshold (entr_t),
+  and a time difference threshold (delta_t). While there are lots of studies that explain ways to
+  determine minpts, eps, and entr_t, information lacks deciding on
+  an accurate delta_t parameter. This paper explains one method of how to choose an adequate delta_t parameter: implement a DBSCAN Entropy algorithm in R alongside raw GPS data maps to use for comparison.
 keywords:
-- GPS Data, Trips, Clusters
+- GPS Data, Trips, DBSCAN, parameters
 ---
 

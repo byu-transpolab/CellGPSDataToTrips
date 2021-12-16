@@ -32,6 +32,16 @@
   
 
 <link rel="next" href="methods.html"/>
+<style type="text/css">
+p.abstract{
+  text-align: center;
+  font-weight: bold;
+}
+div.abstract{
+  margin: auto;
+  width: 90%;
+}
+</style>
 <script src="libs/header-attrs-2.11/header-attrs.js"></script>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
@@ -147,6 +157,14 @@ Brigham Young University<br>
 <a class="author_email" href="mailto:#"><a href="mailto:gregmacfarlane@byu.edu" class="email">gregmacfarlane@byu.edu</a></a>
 </address>
 <p class="date"><em>2021-12-15</em></p>
+<div class="abstract">
+<p class="abstract">Abstract</p>
+<p>DBSCAN Entropy algorithms appear to be the most accurate way to process the GPS data into trips/activities. This algorithm takes
+four parameters to work: minimum number of points (minpts), radius for those points (eps), entropy threshold (entr_t),
+and a time difference threshold (delta_t). While there are lots of studies that explain ways to
+determine minpts, eps, and entr_t, information lacks deciding on
+an accurate delta_t parameter. This paper explains one method of how to choose an adequate delta_t parameter: implement a DBSCAN Entropy algorithm in R alongside raw GPS data maps to use for comparison.</p>
+</div>
 </div>
 <div id="question" class="section level1" number="1">
 <h1><span class="header-section-number"> 1</span> Question</h1>

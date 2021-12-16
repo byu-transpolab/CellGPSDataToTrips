@@ -1,7 +1,7 @@
 ---
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 # Findings
 
@@ -32,7 +32,7 @@ errorTableHead %>% select(
 Figure 3.1 visualizes the percent error between algorithm clusters and manual clusters
 for all 10 dates. The black line represents the overall trend line.
 
-```{r showErrorPlot, echo=FALSE, message=FALSE, warning=FALSE, fig.cap = "Percent errors for different delta_t parameters by date"}
+```{r showErrorPlot, echo=FALSE, fig.cap= "delta_t versus percent error by date", message=FALSE, warning=FALSE}
 errorPlot
 ```
 
