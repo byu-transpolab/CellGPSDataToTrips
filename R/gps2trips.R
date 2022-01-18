@@ -14,13 +14,13 @@
 #' @details caps can be made and loaded using the _targets.R file
 
 makeCaps <- function(folder) {
-  files_in_folder <- unzip(folder, list = TRUE)$Name
+  files_in_folder <- dir(folder, full.names = T)
   caps <- lapply(files_in_folder, function(x){
-    readr::read_csv(unz(folder,x) , col_types = list(userId = col_character())) %>%
+    readr::read_csv(x, col_types = list(userId = col_character())) %>%
       dplyr::transmute(
         id = userId,
         lat, lon,
-        timestamp,
+        timestamp = time,
         date = lubridate::date(timestamp),   # Separate Date and Time columns
         hour = lubridate::hour(timestamp),
         minute = lubridate::minute(timestamp),
@@ -115,6 +115,7 @@ param_packer <- function(x, y, z, q){
 }
 
 #' Generate multiple estimates of the dbscan with random parameters
+#' Set the parameters in the Targets.R file
 #'
 #' @param caps Dataset of CAPS gps traces
 #' @param eps parameter for generating random eps. This is the mean of a normal
@@ -124,14 +125,14 @@ param_packer <- function(x, y, z, q){
 #' @param delta_t parameter for generating time splits between activities. This 
 #'   is the arrival rate of a negative exponential function.
 
-randomClusters <- function(caps, eps = 25, minPts = 3, delta_t = 400, entr_t = 1.0, ndraws = 5){
+randomClusters <- function(caps, eps, minPts, delta_t, entr_t, ndraws){
   
   # create a bunch of sets of parameters randomly.
   tibble(
-    eps = eps,
-    minpts = minPts,
+    eps = rlnorm(ndraws, mean = log(eps),2),
+    minpts = sample(1:minPts, ndraws, replace = T),
     delta_t = rexp(ndraws, 1 / delta_t),
-    entr_t = entr_t
+    entr_t = runif(ndraws, min = 1, max = 2.5)
   ) %>%
     mutate(draw = row_number()) %>%
     rowwise() %>%
