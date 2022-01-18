@@ -8,8 +8,8 @@ tar_option_set(packages = c("dplyr","hms", "lubridate", "tidyverse", "leaflet", 
 
 # End this file with a list of target objects.
 list(
-  tar_target(caps, makeCaps("data/SensorData-1596231685391.zip")),
-  tar_target(random_clusters, randomClusters(caps, eps = 40, minPts = 20, delta_t = 400, entr_t = 1.0, ndraws = 20)),
+  tar_target(caps, makeCaps("data")),
+  tar_target(random_clusters, randomClusters(caps, eps = 50, minPts = 50, delta_t = 400, entr_t = 1.0, ndraws = 100)),
   tar_target(params, random_clusters$params),
   tar_target(manualTable, getGeoJson(folder = "manual_clusters")),
   tar_target(matchStats, calculateMatchStats(random_clusters, manualTable)),
