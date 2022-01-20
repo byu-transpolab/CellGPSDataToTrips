@@ -37,7 +37,7 @@ makeCaps <- function(folder) {
                        str_pad(date(timestamp), width = 2, pad = "0"))) %>%
     group_by(min) %>% slice_sample(n = 20) %>%
     arrange(timestamp) %>%
-    group_by(date) %>%
+    group_by(id, date) %>%
     nest() %>%
     mutate(n = map(data, nrow)) %>%
     filter(n > 400)

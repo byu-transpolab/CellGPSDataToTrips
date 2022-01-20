@@ -47,7 +47,7 @@ countClustersPct <- function(manual, clusters) {
 #' @return tibble including error integer and percent error
 #' @details calculates the errors that get appended in the getMatchStats function
 getErrors <- function(clusters, manualTable) {
-  inner_join(manualTable, clusters, by = "date") %>%
+  inner_join(manualTable, clusters, by = c("date", "id")) %>%
     mutate(
       error = map2(manual, clusters, countClusters),
       pctError = map2(manual, clusters, countClustersPct)
