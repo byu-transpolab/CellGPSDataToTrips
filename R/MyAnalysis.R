@@ -80,3 +80,14 @@ pctErrorPlot <- function(matchStats) {
    ggplotly(plot)
 }
 
+makeMaps <- function(caps,id, mydate) {
+  st_as_sf((caps %>% filter(id == id, date == mydate))$data[[1]], 
+           coords = c("lon", "lat"), crs = 4326) %>%
+    ggplot() + annotation_map_tile() + geom_sf() + labs(
+      title = id,
+      subtitle = mydate
+    )
+}
+
+
+
