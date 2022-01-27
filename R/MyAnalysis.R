@@ -83,11 +83,25 @@ pctErrorPlot <- function(matchStats) {
 makeMaps <- function(caps,id, mydate) {
   st_as_sf((caps %>% filter(id == id, date == mydate))$data[[1]], 
            coords = c("lon", "lat"), crs = 4326) %>%
-    ggplot() + annotation_map_tile() + geom_sf() + labs(
+    ggplot(aes(color = as.numeric(time))) + annotation_map_tile() + geom_sf() + labs(
       title = id,
       subtitle = mydate
-    )
+    ) + scale_color_viridis()
 }
 
+getRandomDates <- function(caps) {
+  myIDs <- unique(caps$id)
+  randomID <- sample(myIDs, size = min(10,length(myIDs)))
+  randomDate <- caps %>% filter(id %in% randomID) %>%
+    group_by(id) %>% slice_sample(n = 3)
+  return(randomDate)
+}
 
+makeAllMaps <- function(caps){
+  myDays <- getRandomDates(caps)
+  plots <- list()
+  for(i in 1:nrow(myDays)){
+    plots[[i]] <- makeMaps(myDays,myDays$id[i], myDays$date[i])
+  }
+}
 
