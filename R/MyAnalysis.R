@@ -3,13 +3,14 @@
 #' @details caps can be made and loaded using the _targets.R file
 #' 
 getGeoJson <- function(folder){
-  files <- dir(folder)
+  files <- file_path_sans_ext(dir(folder))
   manualList <- lapply(files, function(file) {
     st_read(file.path(folder, file))
   }
   )
-  tibble(date = as_date(substr(files, 1, 10)),
-         manual = manualList)
+  tibble <- tibble(manual = manualList,
+                   name_of_file = files)
+  tibble %>% separate(name_of_file, c("date", "id"), sep = c("_"))
 }
 
 #' @param random_clusters and manualTable targets
