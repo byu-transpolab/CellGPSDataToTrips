@@ -3,13 +3,13 @@
 #' @details caps can be made and loaded using the _targets.R file
 #' 
 getGeoJson <- function(folder){
-  files <- file_path_sans_ext(dir(folder))
+  files <- (dir(folder))
   manualList <- lapply(files, function(file) {
     st_read(file.path(folder, file))
   }
   )
   tibble <- tibble(manual = manualList,
-                   name_of_file = files)
+                   name_of_file = file_path_sans_ext(files))
   tibble %>% separate(name_of_file, c("date", "id"), sep = c("_"))
 }
 
