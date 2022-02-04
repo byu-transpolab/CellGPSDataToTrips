@@ -10,7 +10,9 @@ getGeoJson <- function(folder){
   )
   tibble(manual = manualList,
                    name_of_file = file_path_sans_ext(files)) %>% 
-    separate(name_of_file, c("date", "id"), sep = c("_"))
+    separate(name_of_file, c("chardate", "id"), sep = c("_")) %>%
+    mutate(date = as.Date(chardate))
+  
 }
 
 #' @param random_clusters and manualTable targets
@@ -41,7 +43,7 @@ countClusters <- function(manual, clusters) {
 #' @return percent error value
 #' 
 countClustersPct <- function(manual, clusters) {
-  (nrow(manual) - nrow(clusters)) / nrow(manual)
+  abs((nrow(manual) - nrow(clusters))) / nrow(manual)
 }
 
 #' @param tibble of manual clusters and algorithm clusters
@@ -59,21 +61,23 @@ getErrors <- function(clusters, manualTable) {
 #' @return interactive line plot of delta_t vs. percent error
 #' @details includes a line of best fit/ trend line
 pctErrorPlot <- function(matchStats) {
-  matchStatsErrorsOnly <- matchStats %>%
+  matchStatsLong <- matchStats %>%
     select(
-      date, eps, minpts, delta_t, entr_t, error, pctError)
-  # Make data long format
-  matchStatsLong <- melt(setDT(matchStatsErrorsOnly), id.vars = c("date", "error", "pctError"), variable.name = "parameters")
-  
+      date, eps, minpts, delta_t, entr_t, error, pctError) %>%
+    pivot_longer(cols = c("eps", "minpts", "delta_t", "entr_t"), names_to = "parameters", values_to = "value") %>%
+    mutate(error = as.numeric(error),
+           pctError = as.numeric(pctError))
+ 
   # Plot percent Error
-    plot <- ggplot(matchStatsLong %>% filter(parameters == "delta_t", value <= 400), aes(col = as.factor(date))) +
-     geom_point(aes(x = as.numeric(value), y = as.numeric(pctError)), size = 3)+
-     geom_line(aes(x = as.numeric(value), y = as.numeric(pctError))) +
-    geom_smooth(aes(x = as.numeric(value), y = as.numeric(pctError)), method = 'lm', formula = y ~ x, se = F, col = "black") +
+    plot <- ggplot(matchStatsLong, aes(x = value, y = pctError)) +
+     geom_point(size = 3)+
+    # geom_line() +
+    # geom_smooth(method = 'lm', formula = y ~ x, se = F, col = "black") +
     labs(
       x = "delta_t (seconds)",
       y = "Error (%)"
     ) +
+      facet_wrap(~parameters, scales = "free_x") +
     guides(col = guide_legend(title = "Date"))+
     theme_bw()
    
