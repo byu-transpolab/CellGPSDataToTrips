@@ -8,9 +8,9 @@ getGeoJson <- function(folder){
     st_read(file.path(folder, file))
   }
   )
-  tibble <- tibble(manual = manualList,
-                   name_of_file = file_path_sans_ext(files))
-  tibble %>% separate(name_of_file, c("date", "id"), sep = c("_"))
+  tibble(manual = manualList,
+                   name_of_file = file_path_sans_ext(files)) %>% 
+    separate(name_of_file, c("date", "id"), sep = c("_"))
 }
 
 #' @param random_clusters and manualTable targets
