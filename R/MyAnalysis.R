@@ -110,3 +110,25 @@ makeAllMaps <- function(caps){
   }
 }
 
+#' @param matchStats target which is a list
+#' @return the sum of all the errors calculated from the difference
+#' between algorithm clusters and manual_clusters
+#' @details this summation is the value we will be minimizing in the optim() function
+#' to find the best parameters
+
+sumError <- function(matchStats) {
+  sumErrors <- abs(Reduce("+",matchStats$error))
+  sumErrors
+}
+
+#' @param initial parameters to optimize params target, sumError function which
+#' returns a scalar result (sumErrors), method used to minimize the error, lower
+#' and upper limits for the parameters
+#' @return a list of optimized parameters that minimize the sumErrors value
+#' @details the optimized parameters are the ones to use in the algorithm from
+#' here on out
+optimizeParams <- function(par = params, fn = sumError(matchStats),
+                           method = "L=BFGS-B", lower = c(), upper = c()){
+  optim(par, fn, method, lower, upper)
+}
+
