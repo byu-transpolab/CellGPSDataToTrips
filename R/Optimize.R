@@ -1,3 +1,10 @@
+#' Function to clean GPS data
+#'
+#'
+#' @param folder of raw GPS data
+#' @return tibble of cleaned data CAPS
+#' @details cleaned_data can be made and loaded using the _targets.R file
+
 cleanData <- function(folder) {
   files_in_folder <- dir(folder, full.names = T)
   caps <- lapply(files_in_folder, function(x){
@@ -53,7 +60,7 @@ yesterday <- function(timestamp){
 #' Function to convert lat and long to geometric coordinates
 #'
 #'
-#' @param cleaned tibble of GPS points C
+#' @param cleaned tibble of GPS points 
 #' @return nested column of GPS data where each GPS data is a tibble including 
 #' information about the GPS point and the lat and long columns are replaced with a 
 #' single geometric coordinates column called "geometry"
@@ -81,10 +88,10 @@ makeClusters <- function(df, params) {
 #'
 #'
 #' @param cleaned tibble of GPS points and list of DBSCAN and entropy parameters
-#' @return clusters_per_date target which includes the date, number of GPS points
+#' @return algorithm_table target which includes the date, number of GPS points
 #' for that date, the nested data column, and the nested clusters column
-#' @details the nested data and clusters column come from make_sf() and make_clusters()
-#' respectively
+#' @details the nested data and clusters column come from make_sf() and 
+#' make_clusters() respectively
 
 makeAlgorithmTable <- function(params, cleaned_data){
   print(params)
@@ -93,6 +100,13 @@ makeAlgorithmTable <- function(params, cleaned_data){
     mutate(data = map(data, makeSf)) %>%
     mutate(clusters = map(data, makeClusters, params = params))
 }
+
+#' Function to convert GeoJSON files into manual clusters table
+#'
+#'
+#' @param folder of GeoJSON files named by Date_ID that include the number of clusters
+#' @return manual_table target which includes the id, date
+#' and the nested clusters column
 
 makeManualTable <- function(folder){
   files <- (dir(folder))
@@ -103,17 +117,40 @@ makeManualTable <- function(folder){
   tibble(manual = manualList,
          name_of_file = file_path_sans_ext(files)) %>% 
     separate(name_of_file, c("chardate", "id"), sep = c("_")) %>%
-    mutate(date = as.Date(chardate))
+    mutate(date = as.Date(chardate)) %>%
+    select(-c("chardate"))
 }
+
+#' Function to join the manual_table with the algorithm_table by ID and date
+#'
+#'
+#' @param manual_table and algorithm_table targets
+#' @return alg_manual_table target which includes the id, date
+#' and the nested clusters column from both the manual table and algorithm table
 
 joinTables <- function(manual_table,algorithm_table) {
   inner_join(manual_table, algorithm_table, by = c("date"))
 }
 
+#' Function to calculate the RMSE error between algorithm and manual clusters
+#'
+#'
+#' @param alg_manual_table target and initial set of params as defined in the optims 
+#' function
+#' @return RMSE error integer
+
 calculateError <- function(alg_manual_table, params) {
   clusters <- makeClusters(alg_manual_table, params)
   sum(clusters - alg_manual_table$manual)^2
 }
+
+#' Function to minimize the RMSE between algorithm clusters and manual clusters
+#' and find the optimum values for each paramters that does so
+#'
+#'
+#' @param initial vector for params and the calculateError function to be minimized
+#' @return vector of optimized parameters 
+#' @details param[1,2,3,4] are eps, minpts, delta_t, and entr_t respectively
 
 optimize <- function(params = c(1,2,3,4), fn = calculateError) {
   optim(params, fn, method, upper = c(0,0,0,0), lower = c(100,100,100,100),
