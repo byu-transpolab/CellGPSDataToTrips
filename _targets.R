@@ -2,7 +2,7 @@ library(targets)
 
 #source("R/gps2trips.R")
 #source("R/MyAnalysis.R")
-source("Optimize.R")
+source("R/Optimize.R")
 
 # Set target-specific options such as packages.
 tar_option_set(packages = c("dplyr","tools", "hms", "lubridate", 
@@ -12,7 +12,7 @@ tar_option_set(packages = c("dplyr","tools", "hms", "lubridate",
 # End this file with a list of target objects.
 list(
   tar_target(cleaned_data, cleanData("data")),
-  tar_target(algorithm_table, makeAlgorithmTable(params = c(1,2,3,4), cleaned_data[2,])),
+  tar_target(algorithm_table, makeAlgorithmTable(params = c(1,2,3,4), cleaned_data)),
   tar_target(manual_table, makeManualTable("manual_clusters")),
   tar_target(alg_manual_table, joinTables(manual_table, algorithm_table)),
   tar_target(optimized_params, optimize(alg_manual_table)),
