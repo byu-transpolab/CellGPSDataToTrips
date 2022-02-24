@@ -57,6 +57,10 @@ getErrors <- function(clusters, manualTable) {
     )
 }
 
+combineTables <- function(manual_table,algorithm_table) {
+  inner_join(manual_table, algorithm_table, by = c("date", "id"))
+}
+
 #' @param matchStats target which is a list
 #' @return interactive line plot of delta_t vs. percent error
 #' @details includes a line of best fit/ trend line
@@ -117,6 +121,8 @@ makeAllMaps <- function(caps){
 #' to find the best parameters
 
 sumError <- function(matchStats) {
+  # the Reduce() function allows for mathematical operations on and across
+  # columns of a list 
   sumErrors <- abs(Reduce("+",matchStats$error))
   sumErrors
 }
@@ -127,8 +133,8 @@ sumError <- function(matchStats) {
 #' @return a list of optimized parameters that minimize the sumErrors value
 #' @details the optimized parameters are the ones to use in the algorithm from
 #' here on out
-optimizeParams <- function(par = params, fn = sumError(matchStats),
-                           method = "L=BFGS-B", lower = c(), upper = c()){
+optimizeParams <- function(par = params, fn = sumError, matchStats = matchStats,
+                           method = "L-BFGS-B", lower = c(), upper = c()){
   optim(par, fn, method, lower, upper)
 }
 

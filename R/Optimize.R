@@ -1,21 +1,6 @@
-## code to prepare `DATASET` dataset goes here
-
-# CAPS DATA (CONFIDENTIAL) ==============
-#
-# The file is really a folder that contains the trace information for
-# a single individual. Let's read all the CSV files in that folder
-
-
-#' Function to clean GPS data
-#'
-#'
-#' @param zip folder of raw GPS data
-#' @return tibble of cleaned data CAPS
-#' @details caps can be made and loaded using the _targets.R file
-
 cleanData <- function(folder) {
-  files_in_folder <- dir(folder[1:2], full.names = T)
-  cleaned_data <- lapply(files_in_folder, function(x){
+  files_in_folder <- dir(folder, full.names = T)
+  caps <- lapply(files_in_folder, function(x){
     readr::read_csv(x, col_types = list(userId = col_character())) %>%
       dplyr::transmute(
         id = userId,
@@ -100,47 +85,42 @@ makeClusters <- function(df, params) {
 #' for that date, the nested data column, and the nested clusters column
 #' @details the nested data and clusters column come from make_sf() and make_clusters()
 #' respectively
+
 makeAlgorithmTable <- function(params, cleaned_data){
   print(params)
-  algorithm_table <- cleaned_data %>%
+  clusters_tibble <- cleaned_data %>%
     ungroup() %>%
     mutate(data = map(data, makeSf)) %>%
     mutate(clusters = map(data, makeClusters, params = params))
+}
+
+makeManualTable <- function(folder){
+  files <- (dir(folder))
+  manualList <- lapply(files, function(file) {
+    st_read(file.path(folder, file))
+  }
+  )
+  tibble(manual = manualList,
+         name_of_file = file_path_sans_ext(files)) %>% 
+    separate(name_of_file, c("chardate", "id"), sep = c("_")) %>%
+    mutate(date = as.Date(chardate))
+}
+
+joinTables <- function(manual_table,algorithm_table) {
+  inner_join(manual_table, algorithm_table, by = c("date"))
+}
+
+calculateError <- function(alg_manual_table, params) {
+  clusters <- makeClusters(alg_manual_table, params)
+  sum(clusters - alg_manual_table$manual)^2
+}
+
+optimize <- function(params = c(1,2,3,4), fn = calculateError) {
+  optim(params, fn, method, upper = c(0,0,0,0), lower = c(100,100,100,100),
+        method = "L-BFGS-B")
+}
   
-  # creates clusters_per_date target
-}
-
-param_packer <- function(x, y, z, q){
-  list(c(x, y, z, q)) 
-}
-
-#' Generate multiple estimates of the dbscan with random parameters
-#' Set the parameters in the Targets.R file
-#'
-#' @param caps Dataset of CAPS gps traces
-#' @param eps parameter for generating random eps. This is the mean of a normal
-#'   distribution
-#' @param minPts parameter for generating random minimum points. This is the maximum
-#'   integer allowed
-#' @param delta_t parameter for generating time splits between activities. This 
-#'   is the arrival rate of a negative exponential function.
-
-randomClusters <- function(caps, eps, minPts, delta_t, entr_t, ndraws){
   
-  # create a bunch of sets of parameters randomly.
-  tibble(
-    eps = rlnorm(ndraws, mean = log(eps),2),
-    minpts = sample(1:minPts, ndraws, replace = T),
-    delta_t = rexp(ndraws, 1 / delta_t),
-    entr_t = runif(ndraws, min = 1, max = 2.5)
-  ) %>%
-    mutate(draw = row_number()) %>%
-    rowwise() %>%
-    mutate(params = param_packer(eps, minpts, delta_t, entr_t)) %>%
-    ungroup() %>%
-    mutate(
-      clusters = map(params, caps_tr, caps = caps)
-    )
-}
-
+  
+  
 
