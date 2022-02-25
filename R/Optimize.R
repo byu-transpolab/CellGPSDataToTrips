@@ -141,7 +141,7 @@ joinTables <- function(manual_table,algorithm_table) {
 
 calculateError <- function(alg_manual_table, params) {
   clusters <- makeClusters(alg_manual_table, params)
-  sum(clusters - alg_manual_table$manual)^2
+  sum(alg_manual_table$clusters - alg_manual_table$manual)^2
 }
 
 #' Function to minimize the RMSE between algorithm clusters and manual clusters
@@ -153,7 +153,7 @@ calculateError <- function(alg_manual_table, params) {
 #' @details param[1,2,3,4] are eps, minpts, delta_t, and entr_t respectively
 
 optimize <- function(params = c(1,2,3,4), fn = calculateError) {
-  optim(params, fn, method, upper = c(0,0,0,0), lower = c(100,100,100,100),
+  optim(params, fn, upper = c(0,0,0,0), lower = c(100,100,100,100),
         method = "L-BFGS-B")
 }
   
