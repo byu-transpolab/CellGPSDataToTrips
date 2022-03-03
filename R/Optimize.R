@@ -98,7 +98,7 @@ makeAlgorithmTable <- function(params, cleaned_data){
   clusters_tibble <- cleaned_data %>%
     ungroup() %>%
     mutate(data = map(data, makeSf)) %>%
-    mutate(clusters = map(data, makeClusters, params = params))
+    mutate(algorithm = map(data, makeClusters, params = params))
 }
 
 #' Function to convert GeoJSON files into manual clusters table
