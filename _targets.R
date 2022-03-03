@@ -12,7 +12,7 @@ tar_option_set(packages = c("dplyr","tools", "hms", "lubridate",
 # End this file with a list of target objects.
 list(
   tar_target(cleaned_data, cleanData("data")),
-  tar_target(algorithm_table, makeAlgorithmTable(params = c(1,2,3,4), cleaned_data)),
+  tar_target(algorithm_table, makeAlgorithmTable(params = c(30,4,200,1.0), cleaned_data)),
   tar_target(manual_table, makeManualTable("manual_clusters")),
   tar_target(alg_manual_table, joinTables(manual_table, algorithm_table)),
   tar_target(optimized_params, optimize(alg_manual_table)),
