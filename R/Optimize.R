@@ -32,7 +32,7 @@ cleanData <- function(folder) {
     group_by(id, date) %>%
     nest() %>%
     mutate(n = map(data, nrow)) %>%
-    filter(n > 400)
+    filter(n > 400)  # Removes dates with less than 400 points of data
 }
 
 #' Function to compute meaningful day
@@ -128,8 +128,12 @@ makeManualTable <- function(folder){
 #' @return alg_manual_table target which includes the id, date
 #' and the nested clusters column from both the manual table and algorithm table
 
+# Remember to also group by id once I get manual_clusters that match what is in
+# the data folder
+
 joinTables <- function(manual_table,algorithm_table) {
-  inner_join(manual_table, algorithm_table, by = c("date"))
+  inner_join(manual_table, algorithm_table, by = c("date", "id")) %>%
+    as_tibble()
 }
 
 #' Function to calculate the RMSE error between algorithm and manual clusters
@@ -139,9 +143,11 @@ joinTables <- function(manual_table,algorithm_table) {
 #' function
 #' @return RMSE error integer
 
+## Need to unnest alg_manual_table columns in order for this to work
+
 calculateError <- function(alg_manual_table, params) {
   clusters <- makeClusters(alg_manual_table, params)
-  sum(alg_manual_table$clusters - alg_manual_table$manual)^2
+  sum(nrow(alg_manual_table$clusters) - nrow(alg_manual_table$manual))^2
 }
 
 #' Function to minimize the RMSE between algorithm clusters and manual clusters
@@ -153,7 +159,7 @@ calculateError <- function(alg_manual_table, params) {
 #' @details param[1,2,3,4] are eps, minpts, delta_t, and entr_t respectively
 
 optimize <- function(params = c(1,2,3,4), fn = calculateError) {
-  optim(params, fn, upper = c(0,0,0,0), lower = c(100,100,100,100),
+  optim(params, fn, lower = c(10,3,300,1.0), upper = c(50,200,Inf,4),
         method = "L-BFGS-B")
 }
   
