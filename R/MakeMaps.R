@@ -1,3 +1,28 @@
+makeMaps <- function(cleaned_data,id, mydate) {
+  st_as_sf((cleaned_data %>% filter(id == id, date == mydate))$data[[1]], 
+           coords = c("lon", "lat"), crs = 4326) %>%
+    ggplot(aes(color = as.numeric(time))) + annotation_map_tile() + geom_sf() + labs(
+      title = id,
+      subtitle = mydate
+    ) + scale_color_viridis()
+}
+
+getRandomDates <- function(cleaned_data) {
+  myIDs <- unique(cleaned_data$id)
+  randomID <- sample(myIDs, size = min(10,length(myIDs)))
+  randomDate <- cleaned_data %>% filter(id %in% randomID) %>%
+    group_by(id) %>% slice_sample(n = 3)
+  return(randomDate)
+}
+
+makeAllMaps <- function(cleaned_data){
+  myDays <- getRandomDates(cleaned_data)
+  plots <- list()
+  for(i in 1:nrow(myDays)){
+    plots[[i]] <- makeMaps(myDays,myDays$id[i], myDays$date[i])
+  }
+}
+
 #' @param folder of GeoJSON files named by date in same format as caps
 #' @return tibble of list of manual clusters
 #' @details caps can be made and loaded using the _targets.R file
@@ -57,9 +82,6 @@ getErrors <- function(clusters, manualTable) {
     )
 }
 
-combineTables <- function(manual_table,algorithm_table) {
-  inner_join(manual_table, algorithm_table, by = c("date", "id"))
-}
 
 #' @param matchStats target which is a list
 #' @return interactive line plot of delta_t vs. percent error
@@ -89,30 +111,6 @@ pctErrorPlot <- function(matchStats) {
    ggplotly(plot)
 }
 
-makeMaps <- function(caps,id, mydate) {
-  st_as_sf((caps %>% filter(id == id, date == mydate))$data[[1]], 
-           coords = c("lon", "lat"), crs = 4326) %>%
-    ggplot(aes(color = as.numeric(time))) + annotation_map_tile() + geom_sf() + labs(
-      title = id,
-      subtitle = mydate
-    ) + scale_color_viridis()
-}
-
-getRandomDates <- function(caps) {
-  myIDs <- unique(caps$id)
-  randomID <- sample(myIDs, size = min(10,length(myIDs)))
-  randomDate <- caps %>% filter(id %in% randomID) %>%
-    group_by(id) %>% slice_sample(n = 3)
-  return(randomDate)
-}
-
-makeAllMaps <- function(caps){
-  myDays <- getRandomDates(caps)
-  plots <- list()
-  for(i in 1:nrow(myDays)){
-    plots[[i]] <- makeMaps(myDays,myDays$id[i], myDays$date[i])
-  }
-}
 
 #' @param matchStats target which is a list
 #' @return the sum of all the errors calculated from the difference
