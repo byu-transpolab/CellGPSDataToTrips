@@ -21,6 +21,7 @@ makeAllMaps <- function(cleaned_data){
   for(i in 1:nrow(myDays)){
     plots[[i]] <- makeMaps(myDays,myDays$id[i], myDays$date[i])
   }
+  return(plots)
 }
 
 
