@@ -12,11 +12,11 @@ cleanData <- function(folder) {
       dplyr::transmute(
         id = userId,
         lat, lon,
-        timestamp = time,
-        date = lubridate::date(timestamp),   # Separate Date and Time columns
-        hour = lubridate::hour(timestamp),
-        minute = lubridate::minute(timestamp),
-        second = lubridate::second(timestamp),
+        timestamp = lubridate::as_datetime(timestamp),
+        date = date(timestamp),   # Separate Date and Time columns
+        hour = hour(timestamp),
+        minute = minute(timestamp),
+        second = second(timestamp),
         time = hms::as_hms(str_c(hour, minute, second, sep = ":")),
       ) %>% select(-hour, -minute, -second)
   }) %>%
@@ -24,15 +24,23 @@ cleanData <- function(folder) {
     mutate(
       activityDay = yesterday(timestamp)
     ) %>%
+    
+    # Want to sample down, and get about 20 observations per minute
+    # create a group for each minute
     mutate(min = str_c(str_pad(hour(timestamp), width = 2, pad = "0"),
                        str_pad(minute(timestamp), width = 2, pad = "0"),
                        str_pad(date(timestamp), width = 2, pad = "0"))) %>%
+    # sample 20 rows in that group
     group_by(min) %>% slice_sample(n = 20) %>%
+    
+    # now we want to make sure that all the observations from one day 
+    # are in a single sf object. So we group by ID and date. This is
+    # the modified date that puts 12 AM to 3 AM on the previous day.
     arrange(timestamp) %>%
     group_by(id, date) %>%
     nest() %>%
     ungroup() %>%
-    mutate(n = map(data, nrow)) %>%
+    mutate(n = map_int(data, nrow)) %>%
     filter(n > 400) %>% # Removes dates with less than 400 points of data
     mutate(data = map(data, makeSf)) 
 }
