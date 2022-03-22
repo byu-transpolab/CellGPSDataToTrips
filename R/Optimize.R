@@ -32,7 +32,7 @@ cleanData <- function(folder) {
     group_by(id, date) %>%
     nest() %>%
     ungroup() %>%
-    mutate(n = map(data, nrow)) %>%
+    mutate(n = map_int(data, nrow)) %>%
     filter(n > 400) %>% # Removes dates with less than 400 points of data
     mutate(data = map(data, makeSf)) 
 }
@@ -87,9 +87,11 @@ makeClusters_1T <- function(df, params) {
 }
 
 makeClusters <- function(cleaned_manual_table, params) {
+  print(params)
   cleaned_manual_table %>%
     ungroup() %>%
-    mutate(algorithm = map(data, makeClusters_1T, params = params))
+    mutate(algorithm = map(data, makeClusters_1T, 
+                           params = params))
 }
 
 #' Function to convert GeoJSON files into manual clusters table
@@ -102,7 +104,8 @@ makeClusters <- function(cleaned_manual_table, params) {
 makeManualTable <- function(folder){
   files <- (dir(folder))
   manualList <- lapply(files, function(file) {
-    st_read(file.path(folder, file))
+    st_read(file.path(folder, file)) %>%
+      st_transform(32612)
   }
   )
   tibble(manual = manualList,
@@ -134,13 +137,21 @@ joinTables <- function(manual_table,cleaned_data) {
 #' function
 #' @return RMSE error integer
 
-## Need to unnest alg_manual_table columns in order for this to work
 
 calculateError <- function(params, cleaned_manual_table) {
-  test <- makeClusters(cleaned_manual_table, params)
-  T2 <- test %>% mutate(nm = map_int(manual, nrow), 
-                  nal = map_int(algorithm, nrow))
-  sum(T2$nal - T2$nm)^2
+  test <- makeClusters(cleaned_manual_table[1:3,], params)
+  T2 <- test %>% mutate(diff = map2_dbl(manual, algorithm, clusterDistance))
+  sum(T2$diff)
+}
+
+clusterDistance <- function(manual, algorithm){
+  if(nrow(manual)== 0 | nrow(algorithm) == 0){
+    r <- 9000
+  } else {
+    algorithm <- algorithm %>% arrange(start)
+    r <- sum(st_distance(manual, algorithm, by_element = T)) 
+  }
+  r
 }
 
 #' Function to minimize the RMSE between algorithm clusters and manual clusters
@@ -151,10 +162,9 @@ calculateError <- function(params, cleaned_manual_table) {
 #' @return vector of optimized parameters 
 #' @details param[1,2,3,4] are eps, minpts, delta_t, and entr_t respectively
 
-optimize <- function(cleaned_manual_table, params = c(10,3,300,1.0)) {
-  optim(params, fn = calculateError, cleaned_manual_table = cleaned_manual_table,
-        lower = c(10,3,300,1.0), upper = c(50,200,24*3600,4),
-        method = "L-BFGS-B", control = list(maxit = 10))
+optimize <- function(cleaned_manual_table, params = c(15,50,400,1.5)) {
+  sannbox(par = params, fn = calculateError, cleaned_manual_table = cleaned_manual_table,
+        control = list(upper = c(100, 300, 24 * 3600, 4), lower = c(10,3,300, 1)))
 }
   
   
