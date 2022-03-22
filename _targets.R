@@ -6,7 +6,7 @@ source("R/MakeMaps.R")
 # Set target-specific options such as packages.
 tar_option_set(packages = c("dplyr","tools", "hms", "lubridate", 
                             "tidyverse", "leaflet", "sf", "gpsactivs", 
-                            "ggspatial", "data.table", "plotly", "optimx",
+                            "ggspatial", "data.table", "plotly", 
                             "viridis"))
 
 # End this file with a list of target objects.
