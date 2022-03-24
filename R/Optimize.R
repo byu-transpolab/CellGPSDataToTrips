@@ -101,7 +101,7 @@ makeClusters <- function(cleaned_manual_table, params) {
   print(params)
   cleaned_manual_table %>%
     ungroup() %>%
-    mutate(algorithm = map(data, makeClusters_1T, 
+    mutate(algorithm = map(cleaned, makeClusters_1T, 
                            params = params))
 }
 
