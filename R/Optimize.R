@@ -42,9 +42,10 @@ cleanData <- function(folder) {
     group_by(id, date) %>%
     nest() %>%
     ungroup() %>%
-    mutate(n = map_int(data, nrow)) %>%
+    rename(cleaned = data) %>%
+    mutate(n = map_int(cleaned, nrow)) %>%
     filter(n > 400) %>% # Removes dates with less than 400 points of data
-    mutate(data = map(data, makeSf)) 
+    mutate(cleaned = map(cleaned, makeSf)) 
 }
 
 #' Function to compute meaningful day
