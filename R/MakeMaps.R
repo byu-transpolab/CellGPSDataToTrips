@@ -1,20 +1,4 @@
-#' Function to make maps of the cleaned GPS data
-#'
-#'
-#' @param cleaned_data target
-#' @return geom_sf map of raw GPS data
-#' @details the GPS points are colored by time to help
-#' visualize when activities were made and/or if multiple
-#' activities were made to the same place at different times
 
-makeMaps <- function(cleaned_data,id, mydate) {
-  st_as_sf((cleaned_data %>% filter(id == id, date == mydate))$data[[1]], 
-           coords = c("lon", "lat"), crs = 4326) %>%
-    ggplot(aes(color = as.numeric(time))) + annotation_map_tile() + geom_sf() + labs(
-      title = id,
-      subtitle = mydate
-    ) + scale_color_viridis()
-}
 
 #' Function to get randon IDs and Dates to map
 #'
@@ -27,9 +11,9 @@ makeMaps <- function(cleaned_data,id, mydate) {
 
 getRandomDates <- function(cleaned_data) {
   myIDs <- unique(cleaned_data$id)
-  randomID <- sample(myIDs, size = min(10,length(myIDs)))
+  randomID <- sample(myIDs, size = min(20,length(myIDs)))
   randomDate <- cleaned_data %>% filter(id %in% randomID) %>%
-    group_by(id) %>% slice_sample(n = 3)
+    group_by(id) %>% slice_sample(n = 5)
   return(randomDate)
 }
 
@@ -43,11 +27,16 @@ getRandomDates <- function(cleaned_data) {
 
 makeAllMaps <- function(cleaned_data){
   myDays <- getRandomDates(cleaned_data)
-  plots <- list()
-  for(i in 1:nrow(myDays)){
-    plots[[i]] <- makeMaps(myDays,myDays$id[i], myDays$date[i])
-  }
-  return(plots)
+  dir.create("maps", showWarnings = FALSE)
+  
+  future_lapply(seq_along(1:nrow(myDays)), function(i){
+    st_write(
+      myDays$cleaned[[i]] %>%
+        mutate(time = as.character(time)),  
+      str_c( "maps/", myDays$id[i], "_", myDays$date[i], ".geojson", sep = ""),
+      delete_dsn = TRUE, delete_layer = TRUE,
+    )
+  }, future.seed = NULL)
 }
 
 
