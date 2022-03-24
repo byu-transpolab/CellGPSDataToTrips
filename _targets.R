@@ -11,7 +11,7 @@ source("R/MakeMaps.R")
 tar_option_set(packages = c("dplyr","tools", "hms", "lubridate", 
                             "tidyverse", "leaflet", "sf", "gpsactivs", 
                             "ggspatial", "data.table", "plotly", 
-                            "viridis"))
+                            "viridis", "pomp"))
 
 plan(multisession)
 # End this file with a list of target objects.
