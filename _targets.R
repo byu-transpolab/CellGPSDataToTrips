@@ -1,4 +1,8 @@
 library(targets)
+library(future)
+library(future.apply)
+library(furrr)
+
 
 source("R/Optimize.R")
 source("R/MakeMaps.R")
@@ -6,9 +10,10 @@ source("R/MakeMaps.R")
 # Set target-specific options such as packages.
 tar_option_set(packages = c("dplyr","tools", "hms", "lubridate", 
                             "tidyverse", "leaflet", "sf", "gpsactivs", 
-                            "ggspatial", "data.table", "plotly",
-                            "viridis", "pomp"))
+                            "ggspatial", "data.table", "plotly", 
+                            "viridis"))
 
+plan(multisession)
 # End this file with a list of target objects.
 list(
   tar_target(cleaned_data, cleanData("data")),
@@ -19,4 +24,3 @@ list(
   tar_target(num_clusters, makeClusters(cleaned_manual_table = cleaned_data,
                                         params = optimized_params$par))
 )
-
