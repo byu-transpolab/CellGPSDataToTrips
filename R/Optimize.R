@@ -7,7 +7,8 @@
 
 cleanData <- function(folder) {
   files_in_folder <- dir(folder, full.names = T)
-  caps <- lapply(files_in_folder, function(x){
+  
+  caps <- future_lapply(files_in_folder, function(x){
     readr::read_csv(x, col_types = list(userId = col_character())) %>%
       dplyr::transmute(
         id = userId,
@@ -19,12 +20,13 @@ cleanData <- function(folder) {
         second = second(timestamp),
         time = hms::as_hms(str_c(hour, minute, second, sep = ":")),
       ) %>% select(-hour, -minute, -second)
-  }) %>%
+  }, future.seed = NULL) %>%
     dplyr::bind_rows() %>%
     mutate(
       activityDay = yesterday(timestamp)
-    ) %>%
+    )# %>%
     
+   caps %>% 
     # Want to sample down, and get about 20 observations per minute
     # create a group for each minute
     mutate(min = str_c(str_pad(hour(timestamp), width = 2, pad = "0"),
