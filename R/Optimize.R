@@ -5,36 +5,39 @@
 #' @return tibble of cleaned data CAPS
 #' @details cleaned_data can be made and loaded using the _targets.R file
 
-cleanData <- function(folder) {
+cleanData <- function(folder, nfiles = NULL) {
   files_in_folder <- dir(folder, full.names = T)
   
-  caps <- future_lapply(files_in_folder, function(x){
+  if(is.null(nfiles)){
+    nfiles <- length(files_in_folder)
+  }
+  
+  caps <- future_lapply(sample(files_in_folder, nfiles), function(x){
     readr::read_csv(x, col_types = list(userId = col_character())) %>%
       dplyr::transmute(
         id = userId,
         lat, lon,
         timestamp = lubridate::as_datetime(timestamp),
-        date = date(timestamp),   # Separate Date and Time columns
-        hour = hour(timestamp),
-        minute = minute(timestamp),
-        second = second(timestamp),
-        time = hms::as_hms(str_c(hour, minute, second, sep = ":")),
-      ) %>% select(-hour, -minute, -second)
+        date = lubridate::date(timestamp),   # Separate Date and Time columns
+        minute = str_c(
+          str_pad(lubridate::hour(timestamp), width = 2, pad = "0"),
+          str_pad(lubridate::minute(timestamp), width = 2, pad = "0")
+        )
+      ) %>% 
+      # Want to sample down, and get about 20 observations per minute
+      # create a group for each minute
+      # sample 20 rows in that group
+      arrange(date, minute) %>%
+      group_by(date, minute) %>% 
+      slice_sample(n = 10) 
+    
   }, future.seed = NULL) %>%
     dplyr::bind_rows() %>%
     mutate(
       activityDay = yesterday(timestamp)
-    )# %>%
+    ) # %>%
     
    caps %>% 
-    # Want to sample down, and get about 20 observations per minute
-    # create a group for each minute
-    mutate(min = str_c(str_pad(hour(timestamp), width = 2, pad = "0"),
-                       str_pad(minute(timestamp), width = 2, pad = "0"),
-                       str_pad(date(timestamp), width = 2, pad = "0"))) %>%
-    # sample 20 rows in that group
-    group_by(min) %>% slice_sample(n = 20) %>%
-    
     # now we want to make sure that all the observations from one day 
     # are in a single sf object. So we group by ID and date. This is
     # the modified date that puts 12 AM to 3 AM on the previous day.
