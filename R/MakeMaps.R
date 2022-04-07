@@ -22,7 +22,7 @@ getRandomDates <- function(cleaned_data) {
 #'
 #' @param cleaned_data target
 #' @return list of maps, specifically the "maps" target
-#' @details makes a map for each randpm day for each 
+#' @details makes a map for each random day for each 
 #' of the 10 random IDs
 
 makeAllMaps <- function(cleaned_data){
@@ -32,7 +32,7 @@ makeAllMaps <- function(cleaned_data){
   future_lapply(seq_along(1:nrow(myDays)), function(i){
     st_write(
       myDays$cleaned[[i]] %>%
-        mutate(time = as.numeric(time) / 3600) %>%
+        mutate(time = as.numeric(timestamp)) %>%
         st_transform(4326),  
       str_c( "maps/", myDays$id[i], "_", myDays$date[i], ".geojson", sep = ""),
       delete_dsn = TRUE, delete_layer = TRUE,
