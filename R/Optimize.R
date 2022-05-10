@@ -13,7 +13,7 @@ cleanData <- function(folder, nfiles = NULL) {
   }
   
   caps <- future_lapply(sample(files_in_folder, nfiles), function(x){
-    readr::read_csv(x, col_types = list(userId = col_character())) %>%
+    caps <- readr::read_csv(x, col_types = list(userId = col_character())) %>%
       dplyr::transmute(
         id = userId,
         lat, lon,
@@ -35,9 +35,8 @@ cleanData <- function(folder, nfiles = NULL) {
     dplyr::bind_rows() %>%
     mutate(
       activityDay = yesterday(timestamp)
-    ) # %>%
+    )  %>%
     
-   caps %>% 
     # now we want to make sure that all the observations from one day 
     # are in a single sf object. So we group by ID and date. This is
     # the modified date that puts 12 AM to 3 AM on the previous day.
@@ -46,9 +45,10 @@ cleanData <- function(folder, nfiles = NULL) {
     nest() %>%
     ungroup() %>%
     rename(cleaned = data) %>%
-    mutate(n = map_int(cleaned, nrow)) %>%
-    filter(n > 400) %>% # Removes dates with less than 400 points of data
-    mutate(cleaned = map(cleaned, makeSf)) 
+    dplyr::mutate(num_points = purrr::map_int(cleaned, nrow)) %>%
+     filter(num_points > 50)  %>% 
+    mutate(sf = purrr::map(cleaned, makeSf))
+  caps
 }
 
 #' Function to compute meaningful day
@@ -104,7 +104,7 @@ makeClusters <- function(cleaned_manual_table, params) {
   print(params)
   cleaned_manual_table %>%
     ungroup() %>%
-    mutate(algorithm = map(cleaned, makeClusters_1T, 
+    mutate(algorithm = purrr::map(sf, makeClusters_1T, 
                            params = params))
 }
 
@@ -153,13 +153,14 @@ joinTables <- function(manual_table,cleaned_data) {
 
 
 calculateError <- function(params, cleaned_manual_table) {
-  test <- makeClusters(cleaned_manual_table[1:3,], params)
+  test <- makeClusters(cleaned_manual_table, params) %>%
+    filter(algorithm != "no clusters found")
   T2 <- test %>% mutate(diff = map2_dbl(manual, algorithm, clusterDistance))
   sum(T2$diff)
 }
 
 clusterDistance <- function(manual, algorithm){
-  if(nrow(manual)== 0 | nrow(algorithm) == 0){
+  if(nrow(manual)== 0 | nrow(algorithm) == 0) {
     r <- 9000
   } else {
     algorithm <- algorithm %>% arrange(start)
@@ -176,7 +177,7 @@ clusterDistance <- function(manual, algorithm){
 #' @return vector of optimized parameters 
 #' @details param[1,2,3,4] are eps, minpts, delta_t, and entr_t respectively
 
-optimize <- function(cleaned_manual_table, params = c(15,50,400,1.5)) {
+optimize <- function(cleaned_manual_table, params = c(25,60,320,2)) {
   sannbox(par = params, fn = calculateError, cleaned_manual_table = cleaned_manual_table,
         control = list(upper = c(100, 300, 24 * 3600, 4), lower = c(10,3,300, 1)))
 }
