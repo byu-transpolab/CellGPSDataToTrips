@@ -1,6 +1,6 @@
 
 
-#' Function to get randon IDs and Dates to map
+#' Function to get random IDs and Dates to map
 #'
 #'
 #' @param cleaned_data target
