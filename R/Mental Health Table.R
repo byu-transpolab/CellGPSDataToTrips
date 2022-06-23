@@ -19,19 +19,31 @@ addNumTrips <- function(df){
 
 addTripType <- function(tibble){
   
-  ParkTrips <- st_within(tibble$algorithm[[6]], parksSf, sparse = F)
-  GroceryTrips <- st_within(tibble$algorithm[[6]], grocerySf, sparse = F)
-  LibraryTrips <- st_within(tibble$algoritm[[6]], libarySf, sparse = F)
+  parksSf <- sf::st_read("Activities/parks.geojson") %>%
+    st_transform(32612)
+  grocerySf <- sf::st_read("Activities/groceries.geojson") %>%
+    st_transform(32612)
+  librarySf <- sf::st_read("Activities/libraries.geojson") %>%
+    st_transform(32612)
   
-  tibble %>% 
-    rowwise() %>%
-    mutate(
-    numParkTrips = length(ParkTrips[ParkTrips == T]),
-    numGroceryTrips = length(GroceryTrips[GroceryTrips == T]),
-    numLibraryTrips = length(LibraryTrips[LibraryTrips == T])
-  )
+  tibble %>%
+    filter(!is.character(algorithm)) %>%
+    select(-c(sf)) %>%
+    unnest(cols = c(algorithm)) %>%
+    st_as_sf() %>%
+    st_join(parksSf) %>%
+    st_join(grocerySf) %>%
+    st_join(librarySf) %>%
+    mutate(id = id.x)
+    
 }
 
 addMentalHealthResponses <- function(tibble){
-  
+  morningResponses <- read.csv("C:/Users/griches/Desktop/BigCellGPSDataToTrips/mental_surveys/Morning_Survey_220223.csv") %>%
+    rename(id = Study.Id)
+  eveningResponses <- read.csv("C:/Users/griches/Desktop/BigCellGPSDataToTrips/mental_surveys/Evening_Survey_220223.csv")
+  full_join(tibble,morningResponses, by = 'id')
 }
+
+
+
