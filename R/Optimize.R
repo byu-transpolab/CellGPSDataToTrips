@@ -28,8 +28,8 @@ cleanData <- function(folder, nfiles = NULL) {
       # create a group for each minute
       # sample 20 rows in that group
       arrange(date, minute) %>%
-      group_by(date, minute) %>% 
-      slice_sample(n = 10) 
+      group_by(date, minute) #%>% 
+      #slice_sample(n = 10) 
     
   }, future.seed = NULL) %>%
     dplyr::bind_rows() %>%
@@ -46,7 +46,7 @@ cleanData <- function(folder, nfiles = NULL) {
     ungroup() %>%
     rename(cleaned = data) %>%
     dplyr::mutate(num_points = purrr::map_int(cleaned, nrow)) %>%
-     filter(num_points > 50)  %>% 
+     filter(num_points > 100)  %>% 
     mutate(sf = purrr::map(cleaned, makeSf))
   caps
 }
@@ -102,6 +102,9 @@ makeClusters_1T <- function(df, params) {
 
 makeClusters <- function(cleaned_manual_table, params) {
   print(params)
+  write.table(params, 
+              file = "sannbox_params.csv", 
+              append = T, quote = F, row.names = F)
   cleaned_manual_table %>%
     ungroup() %>%
     mutate(algorithm = purrr::map(sf, makeClusters_1T, 
@@ -144,7 +147,7 @@ joinTables <- function(manual_table,cleaned_data) {
     as_tibble()
 }
 
-#' Function to calculate the RMSE error between algorithm and manual clusters
+#' Function to calculate the error between algorithm and manual clusters
 #'
 #'
 #' @param alg_manual_table target and initial set of params as defined in the optims 
@@ -156,6 +159,9 @@ calculateError <- function(params, cleaned_manual_table) {
   test <- makeClusters(cleaned_manual_table, params) %>%
     filter(algorithm != "no clusters found")
   T2 <- test %>% mutate(diff = map2_dbl(manual, algorithm, clusterDistance))
+  write.table(as.character(sum(T2$diff)), 
+              file = "sannbox_error.csv", 
+              append = T, row.names = F)
   sum(T2$diff)
 }
 
@@ -179,10 +185,11 @@ clusterDistance <- function(manual, algorithm){
 
 optimize <- function(cleaned_manual_table, params = c(25,60,320,2)) {
   sannbox(par = params, fn = calculateError, cleaned_manual_table = cleaned_manual_table,
-        control = list(upper = c(100, 300, 24 * 3600, 4), lower = c(10,3,300, 1)))
+        control = list(upper = c(100, 300, 24 * 3600, 4), lower = c(10,3,300, 1),
+                       maxit = 55000))
 }
   
-  
-  
-  
-
+optimize2 <- function(cleaned_manual_table, params = c(25,60,320,2)) {
+  optim(par = params, fn = calculateError, cleaned_manual_table = cleaned_manual_table,
+        method = "L-BFGS-B", upper = c(100, 300, 24 * 3600, 4), lower = c(10,3,300, 1))
+}
