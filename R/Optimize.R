@@ -28,8 +28,8 @@ cleanData <- function(folder, nfiles = NULL) {
       # create a group for each minute
       # sample 20 rows in that group
       arrange(date, minute) %>%
-      group_by(date, minute) #%>% 
-      #slice_sample(n = 10) 
+      group_by(date, minute) %>% 
+      slice_sample(n = 10) 
     
   }, future.seed = NULL) %>%
     dplyr::bind_rows() %>%
