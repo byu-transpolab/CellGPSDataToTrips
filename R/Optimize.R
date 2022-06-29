@@ -180,6 +180,56 @@ clusterDistance <- function(manual, algorithm){
   r
 }
 
+#' Calculate percent of correctly classified points
+#' 
+#' @param manual_centers An sf object of activity locations determined through hand-coding
+#' @param algorithm_centers An sf object of activity locations determined through applying
+#'   the DBSCAN-TE algorithm
+#' @param points An sf object containing raw GPS points for the activities and trips 
+#'   represented in the centers.
+#' @param buffer The radius of the activity locations. This should be the same
+#'   units as the projection of each sf (usually meters).
+#'   
+#' @return The percent of `points` that disagree between inclusion in `manual_centers` and 
+#'   `algorithm_centers`
+#'   
+#' @details This function draws a circular buffer of the prescribed radius around
+#'   the activity centers determined by two methods, one manual and one algorithm-based.
+#'   The points are identified as being within each of the buffers, and the function
+#'   returns the percent of points that are classified differently based on the
+#'   the buffers in both methods.
+#'   
+number_of_points_in_cluster <- function(manual_centers, algorithm_centers, points,
+                                        buffer = 50){
+  
+  # create buffers around activity points
+  manual_buffer <- st_buffer(manual_centers, buffer) %>% st_union()
+  algorithm_buffer <- st_buffer(algorithm_centers, buffer) %>% st_union()
+  
+  # determine whether the points are inside each set of buffers
+  agree <- points %>% 
+    mutate(
+      manual = st_within(geometry, manual_buffer, sparse = FALSE, )[, 1],
+      algori = st_within(geometry, algorithm_buffer, sparse = FALSE)[, 1],
+      
+      # are they the same?
+      agree = manual == algori
+    ) 
+  
+  # calculate percent of FALSE agreement
+  stat <- table(agree$agree)
+  stat[1] / sum(stat)
+  
+  # map (for debugging)
+  # pal <- colorFactor("Dark2", agree$agree)
+  # leaflet() %>%
+  #  addProviderTiles(providers$CartoDB) %>%
+  #  addPolygons(data = manual_buffer %>% st_transform(4326), color = "red")  %>%
+  #  addPolygons(data = algorithm_buffer%>% st_transform(4326), color = "green")  %>%
+  #  addCircles(data = agree %>% st_transform(4326), color = ~pal(agree))
+  
+}
+
 #' Function to minimize the RMSE between algorithm clusters and manual clusters
 #' and find the optimum values for each parameters that does so
 #'
