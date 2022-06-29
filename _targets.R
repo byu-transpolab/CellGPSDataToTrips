@@ -25,10 +25,10 @@ tar_option_set(packages = c("dplyr","tools", "hms", "lubridate",
 # End this file with a list of target objects.
 list(
   # Read in and clean GPS data
-  tar_target(cleaned_data, cleanData("data"), resources = tar_resources(
+  tar_target(cleaned_data, cleanData("data/caps_data"), resources = tar_resources(
     future = tar_resources_future(resources = list(n_cores = threads))
   )),
-  tar_target(manual_table, makeManualTable("manual_clusters")),
+  tar_target(manual_table, makeManualTable("data/manual_clusters")),
   
   # Join cleaned data and manual data to allow for calibration
   tar_target(cleaned_manual_table, joinTables(manual_table, cleaned_data)),

@@ -9,9 +9,9 @@
 
 _bookdown_files/
 _targets/
-data/
-manual_clusters/
-maps/
+data/caps_data
+data/maps
+data/manual_clusters
 
 
 README.html
