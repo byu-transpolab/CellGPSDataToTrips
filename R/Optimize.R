@@ -1,54 +1,59 @@
 #' Function to clean GPS data
-#'
+#' 
+#' Read in raw GPS data for participants in the CAPS survey. Each file
+#' contains the GPS points for a single day and a single respondent.
 #'
 #' @param folder of raw GPS data
-#' @return tibble of cleaned data CAPS
+#' @return tibble of cleaned data. Each row contains a nested sf points object.
 #' @details cleaned_data can be made and loaded using the _targets.R file
-
 cleanData <- function(folder, nfiles = NULL) {
+  
+  # get a list of all the files in the data folder
   files_in_folder <- dir(folder, full.names = T)
+  if(is.null(nfiles)){ nfiles <- length(files_in_folder) }
   
-  if(is.null(nfiles)){
-    nfiles <- length(files_in_folder)
-  }
-  
+  # loop through the files in the folder
+  # this is an embarassingly parallel step implemented with the future library
   caps <- future_lapply(sample(files_in_folder, nfiles), function(x){
-    caps <- readr::read_csv(x, col_types = list(userId = col_character())) %>%
+    
+    # read CSV file and rename / simplify table
+    readr::read_csv(x, col_types = list(userId = col_character())) %>%
       dplyr::transmute(
         id = userId,
         lat, lon,
+        # Separate Date and Time columns
         timestamp = lubridate::as_datetime(timestamp),
-        date = lubridate::date(timestamp),   # Separate Date and Time columns
+        date = lubridate::date(timestamp),   
         minute = str_c(
           str_pad(lubridate::hour(timestamp), width = 2, pad = "0"),
           str_pad(lubridate::minute(timestamp), width = 2, pad = "0")
         )
       ) %>% 
-      # Want to sample down, and get about 20 observations per minute
+      # Want to sample down, and get at most a few observations per minute
       # create a group for each minute
-      # sample 20 rows in that group
-      arrange(date, minute) %>%
-      group_by(date, minute) %>% 
-      slice_sample(n = 10) 
+      arrange(date, minute) %>% group_by(date, minute) %>% 
+      # sample 10 rows in that group, or as many rows as exist
+      slice_sample(n = 10, replace = FALSE ) 
     
-  }, future.seed = NULL) %>%
+  }, future.seed = NULL) 
+    
+  caps %>%
+    # combine all days for all participants into a single tibble
     dplyr::bind_rows() %>%
+    
+    # The travel day is not the same as the calendar date, because people 
+    # frequently are out past midnight. See the 'yesterday()' function for details.
     mutate(
       activityDay = yesterday(timestamp)
     )  %>%
     
-    # now we want to make sure that all the observations from one day 
-    # are in a single sf object. So we group by ID and date. This is
-    # the modified date that puts 12 AM to 3 AM on the previous day.
-    arrange(timestamp) %>%
-    group_by(id, date) %>%
-    nest() %>%
-    ungroup() %>%
+    #' Make a nested tibble for each day / id combination
+    arrange(timestamp) %>% group_by(id, activityDay) %>%
+    nest() %>% ungroup() %>%
     rename(cleaned = data) %>%
     dplyr::mutate(num_points = purrr::map_int(cleaned, nrow)) %>%
-     filter(num_points > 100)  %>% 
-    mutate(sf = purrr::map(cleaned, makeSf))
-  caps
+    filter(num_points > 1000)  %>% 
+    mutate(cleaned = purrr::map(cleaned, makeSf))
 }
 
 #' Function to compute meaningful day
