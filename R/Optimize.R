@@ -156,23 +156,30 @@ joinTables <- function(manual_table,cleaned_data) {
 
 
 calculateError <- function(params, cleaned_manual_table) {
-  test <- makeClusters(cleaned_manual_table, params) %>%
+  clusters <- makeClusters(cleaned_manual_table, params) %>%
     filter(algorithm != "no clusters found")
-  T2 <- test %>% mutate(diff = map2_dbl(manual, algorithm, clusterDistance))
+  T2 <- clusters %>% mutate(diff = map2_dbl(manual, algorithm, numPointsDiff))
   write.table(as.character(sum(T2$diff)), 
               file = "sannbox_error.csv", 
               append = T, row.names = F)
   sum(T2$diff)
 }
 
-clusterDistance <- function(manual, algorithm){
-  if(nrow(manual)== 0 | nrow(algorithm) == 0) {
-    r <- 9000
-  } else {
-    algorithm <- algorithm %>% arrange(start)
-    r <- sum(st_distance(manual, algorithm, by_element = T)) 
-  }
-  r
+numPointsDiff <- function(manual, algorithm){
+   manual_buffer <- st_buffer(x = manual, dist = 100)
+   manual_intersect <- st_contains(manual_buffer, cleaned_data, 
+                                   sparse = FALSE)
+   # Count number of trues from manual_intersect
+   
+   algorithm_buffer <- st_buffer(x = algorithm, dist = 100)
+   algorithm_intersect <- st_contains(algorithm_buffer, cleaned_data, 
+                                      sparse =FALSE)
+   # Count number of trues from algorithm_intersect
+   
+   # Compare the number of trues from the two intersects as a 
+   # measurement of error
+   
+   
 }
 
 #' Function to minimize the RMSE between algorithm clusters and manual clusters
