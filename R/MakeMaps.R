@@ -1,5 +1,3 @@
-
-
 #' Function to get random IDs and Dates to map
 #'
 #'
@@ -8,7 +6,6 @@
 #' @details the returned tibble is the IDs and dates that will
 #' be mapped in order to get random days and numbers of 
 #' clusters
-
 getRandomDates <- function(cleaned_data) {
   myIDs <- unique(cleaned_data$id)
   randomID <- sample(myIDs, size = min(20,length(myIDs)))
@@ -22,9 +19,7 @@ getRandomDates <- function(cleaned_data) {
 #'
 #' @param cleaned_data target
 #' @return list of maps, specifically the "maps" target
-#' @details makes a map for each random day for each 
-#' of the 10 random IDs
-
+#' @details makes a map for each random day for each  of the 10 random IDs
 makeAllMaps <- function(cleaned_data){
   myDays <- getRandomDates(cleaned_data)
   dir.create("maps", showWarnings = FALSE)

@@ -1,54 +1,65 @@
 #' Function to clean GPS data
-#'
+#' 
+#' Read in raw GPS data for participants in the CAPS survey. Each file
+#' contains the GPS points for a single day and a single respondent.
 #'
 #' @param folder of raw GPS data
-#' @return tibble of cleaned data CAPS
+#' @return tibble of cleaned data. Each row contains a nested sf points object.
 #' @details cleaned_data can be made and loaded using the _targets.R file
-
 cleanData <- function(folder, nfiles = NULL) {
+  
+  # get a list of all the files in the data folder
   files_in_folder <- dir(folder, full.names = T)
+  if(is.null(nfiles)){ nfiles <- length(files_in_folder) }
   
-  if(is.null(nfiles)){
-    nfiles <- length(files_in_folder)
-  }
-  
+  # loop through the files in the folder
+  # this is an embarassingly parallel step implemented with the future library
   caps <- future_lapply(sample(files_in_folder, nfiles), function(x){
-    caps <- readr::read_csv(x, col_types = list(userId = col_character())) %>%
+    
+    # read CSV file and rename / simplify table
+    readr::read_csv(x, col_types = list(userId = col_character())) %>%
       dplyr::transmute(
         id = userId,
         lat, lon,
+        # Separate Date and Time columns
         timestamp = lubridate::as_datetime(timestamp),
-        date = lubridate::date(timestamp),   # Separate Date and Time columns
+        date = lubridate::date(timestamp),   
         minute = str_c(
           str_pad(lubridate::hour(timestamp), width = 2, pad = "0"),
           str_pad(lubridate::minute(timestamp), width = 2, pad = "0")
         )
       ) %>% 
-      # Want to sample down, and get about 20 observations per minute
+      # Want to sample down, and get at most a few observations per minute
       # create a group for each minute
-      # sample 20 rows in that group
-      arrange(date, minute) %>%
-      group_by(date, minute) %>% 
-      slice_sample(n = 10) 
+      arrange(date, minute) %>% group_by(date, minute) %>% 
+      # sample 10 rows in that group, or as many rows as exist
+      slice_sample(n = 10, replace = FALSE ) 
     
-  }, future.seed = NULL) %>%
+  }, future.seed = NULL) 
+    
+  caps %>%
+    # combine all days for all participants into a single tibble
     dplyr::bind_rows() %>%
+    ungroup %>%
+    
+    # The travel day is not the same as the calendar date, because people 
+    # frequently are out past midnight. See the 'yesterday()' function for details.
     mutate(
       activityDay = yesterday(timestamp)
     )  %>%
     
-    # now we want to make sure that all the observations from one day 
-    # are in a single sf object. So we group by ID and date. This is
-    # the modified date that puts 12 AM to 3 AM on the previous day.
-    arrange(timestamp) %>%
-    group_by(id, date) %>%
-    nest() %>%
-    ungroup() %>%
+    # want to have each group labeled by a date object, after grouping by the 
+    # activityDay determined above
+    group_by(activityDay) %>%
+    mutate( date = min(date) ) %>%
+    
+    #' Make a nested tibble for each day / id combination
+    arrange(timestamp) %>% group_by(id, date) %>%
+    nest() %>% ungroup() %>%
     rename(cleaned = data) %>%
     dplyr::mutate(num_points = purrr::map_int(cleaned, nrow)) %>%
-     filter(num_points > 100)  %>% 
-    mutate(sf = purrr::map(cleaned, makeSf))
-  caps
+    filter(num_points > 1000)  %>% 
+    mutate(cleaned = purrr::map(cleaned, makeSf))
 }
 
 #' Function to compute meaningful day
@@ -111,20 +122,19 @@ makeClusters <- function(cleaned_manual_table, params) {
                            params = params))
 }
 
-#' Function to convert GeoJSON files into manual clusters table
-#'
+#' Read manually-defined activities
 #'
 #' @param folder of GeoJSON files named by Date_ID that include the number of clusters
-#' @return manual_table target which includes the id, date
-#' and the nested clusters column
-
+#' @return A nested tibble with person ID, date, and an SF points object.
+#' 
+#' 
 makeManualTable <- function(folder){
-  files <- (dir(folder))
+  files <- dir(folder, pattern = ".geojson")
   manualList <- lapply(files, function(file) {
     st_read(file.path(folder, file)) %>%
       st_transform(32612)
-  }
-  )
+  })
+  
   tibble(manual = manualList,
          name_of_file = file_path_sans_ext(files)) %>% 
     separate(name_of_file, c("chardate", "id"), sep = c("_")) %>%
@@ -153,8 +163,6 @@ joinTables <- function(manual_table,cleaned_data) {
 #' @param alg_manual_table target and initial set of params as defined in the optims 
 #' function
 #' @return RMSE error integer
-
-
 calculateError <- function(params, cleaned_manual_table) {
   clusters <- makeClusters(cleaned_manual_table, params) %>%
     filter(algorithm != "no clusters found")
@@ -180,6 +188,56 @@ numPointsDiff <- function(manual, algorithm){
    # measurement of error
    
    
+}
+
+#' Calculate percent of correctly classified points
+#' 
+#' @param manual_centers An sf object of activity locations determined through hand-coding
+#' @param algorithm_centers An sf object of activity locations determined through applying
+#'   the DBSCAN-TE algorithm
+#' @param points An sf object containing raw GPS points for the activities and trips 
+#'   represented in the centers.
+#' @param buffer The radius of the activity locations. This should be the same
+#'   units as the projection of each sf (usually meters).
+#'   
+#' @return The percent of `points` that disagree between inclusion in `manual_centers` and 
+#'   `algorithm_centers`
+#'   
+#' @details This function draws a circular buffer of the prescribed radius around
+#'   the activity centers determined by two methods, one manual and one algorithm-based.
+#'   The points are identified as being within each of the buffers, and the function
+#'   returns the percent of points that are classified differently based on the
+#'   the buffers in both methods.
+#'   
+number_of_points_in_cluster <- function(manual_centers, algorithm_centers, points,
+                                        buffer = 50){
+  
+  # create buffers around activity points
+  manual_buffer <- st_buffer(manual_centers, buffer) %>% st_union()
+  algorithm_buffer <- st_buffer(algorithm_centers, buffer) %>% st_union()
+  
+  # determine whether the points are inside each set of buffers
+  agree <- points %>% 
+    mutate(
+      manual = st_within(geometry, manual_buffer, sparse = FALSE, )[, 1],
+      algori = st_within(geometry, algorithm_buffer, sparse = FALSE)[, 1],
+      
+      # are they the same?
+      agree = manual == algori
+    ) 
+  
+  # calculate percent of FALSE agreement
+  stat <- table(agree$agree)
+  stat[1] / sum(stat)
+  
+  # map (for debugging)
+  # pal <- colorFactor("Dark2", agree$agree)
+  # leaflet() %>%
+  #  addProviderTiles(providers$CartoDB) %>%
+  #  addPolygons(data = manual_buffer %>% st_transform(4326), color = "red")  %>%
+  #  addPolygons(data = algorithm_buffer%>% st_transform(4326), color = "green")  %>%
+  #  addCircles(data = agree %>% st_transform(4326), color = ~pal(agree))
+  
 }
 
 #' Function to minimize the RMSE between algorithm clusters and manual clusters
