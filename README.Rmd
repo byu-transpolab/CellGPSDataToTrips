@@ -1,0 +1,39 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file
+Do not knit this file using the Rstudio knit button. Intead, run
+
+rmarkdown::render("README.Rmd", "github_document") 
+-->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# CellGPSDataToTrips
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+The goal of CellGPSDataToTrips is to ...
+
+## Project Configuration
+This project relies on the tidyverse library.
+A bug introduced to [`slice_sample()`](https://github.com/tidyverse/dplyr/issues/6185)
+means we need to use an old version of `dplyr`. Install the correct version with:
+
+```{r dplyr, eval = FALSE}
+devtools::install_github("tidyverse/dplyr@v1.0.7")
+```
+
+Other tidyverse packages are as listed below.
+```{r tidyverse}
+library(tidyverse)
+```
+
+This project is built using the `targets` and `future` libraries.
