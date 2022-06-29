@@ -122,20 +122,19 @@ makeClusters <- function(cleaned_manual_table, params) {
                            params = params))
 }
 
-#' Function to convert GeoJSON files into manual clusters table
-#'
+#' Read manually-defined activities
 #'
 #' @param folder of GeoJSON files named by Date_ID that include the number of clusters
-#' @return manual_table target which includes the id, date
-#' and the nested clusters column
-
+#' @return A nested tibble with person ID, date, and an SF points object.
+#' 
+#' 
 makeManualTable <- function(folder){
-  files <- (dir(folder))
+  files <- dir(folder, pattern = ".geojson")
   manualList <- lapply(files, function(file) {
     st_read(file.path(folder, file)) %>%
       st_transform(32612)
-  }
-  )
+  })
+  
   tibble(manual = manualList,
          name_of_file = file_path_sans_ext(files)) %>% 
     separate(name_of_file, c("chardate", "id"), sep = c("_")) %>%
@@ -164,8 +163,6 @@ joinTables <- function(manual_table,cleaned_data) {
 #' @param alg_manual_table target and initial set of params as defined in the optims 
 #' function
 #' @return RMSE error integer
-
-
 calculateError <- function(params, cleaned_manual_table) {
   test <- makeClusters(cleaned_manual_table, params) %>%
     filter(algorithm != "no clusters found")
