@@ -40,6 +40,7 @@ cleanData <- function(folder, nfiles = NULL) {
   caps %>%
     # combine all days for all participants into a single tibble
     dplyr::bind_rows() %>%
+    ungroup %>%
     
     # The travel day is not the same as the calendar date, because people 
     # frequently are out past midnight. See the 'yesterday()' function for details.
@@ -47,8 +48,13 @@ cleanData <- function(folder, nfiles = NULL) {
       activityDay = yesterday(timestamp)
     )  %>%
     
+    # want to have each group labeled by a date object, after grouping by the 
+    # activityDay determined above
+    group_by(activityDay) %>%
+    mutate( date = min(date) ) %>%
+    
     #' Make a nested tibble for each day / id combination
-    arrange(timestamp) %>% group_by(id, activityDay) %>%
+    arrange(timestamp) %>% group_by(id, date) %>%
     nest() %>% ungroup() %>%
     rename(cleaned = data) %>%
     dplyr::mutate(num_points = purrr::map_int(cleaned, nrow)) %>%
