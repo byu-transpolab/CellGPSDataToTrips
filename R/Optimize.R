@@ -157,38 +157,39 @@ joinTables <- function(manual_table,cleaned_data) {
     as_tibble()
 }
 
-#' Function to calculate the error between algorithm and manual clusters
+#' Function to return the error between algorithm and manual clusters
 #'
 #'
 #' @param alg_manual_table target and initial set of params as defined in the optims 
 #' function
-#' @return RMSE error integer
+#' 
+#' @return Percent of gps 'points' that do not fall within both the algorithm buffer
+#' and the manual buffer (FALSE)
+#' 
+#' @details This function is what is called in the optimization functions.
+#' It returns the percentage of FALSE points as described in the 'number_of_points_
+#' in_cluster' function. The goal of the optimization functions is to minimize 
+#' the percent FALSE points between the number of points in the algorithm buffer
+#' and the number of points in the manual buffer.
+#' 
 calculateError <- function(params, cleaned_manual_table) {
   clusters <- makeClusters(cleaned_manual_table, params) %>%
-    filter(algorithm != "no clusters found")
-  T2 <- clusters %>% mutate(diff = map2_dbl(manual, algorithm, numPointsDiff))
+    filter(algorithm != "no clusters found") 
+  
+  lapply(clusters, number_of_points_in_cluster(algorithm_centers = algorithm,
+                                                      manual_centers = manual,
+                                                      points = cleaned,
+                                                      buffer = 50))
+  
+  #'Create csv file of all the errors that were calculated through optimization 
+  #'process
+  
   write.table(as.character(sum(T2$diff)), 
               file = "sannbox_error.csv", 
               append = T, row.names = F)
   sum(T2$diff)
 }
 
-numPointsDiff <- function(manual, algorithm){
-   manual_buffer <- st_buffer(x = manual, dist = 100)
-   manual_intersect <- st_contains(manual_buffer, cleaned_data, 
-                                   sparse = FALSE)
-   # Count number of trues from manual_intersect
-   
-   algorithm_buffer <- st_buffer(x = algorithm, dist = 100)
-   algorithm_intersect <- st_contains(algorithm_buffer, cleaned_data, 
-                                      sparse =FALSE)
-   # Count number of trues from algorithm_intersect
-   
-   # Compare the number of trues from the two intersects as a 
-   # measurement of error
-   
-   
-}
 
 #' Calculate percent of correctly classified points
 #' 
