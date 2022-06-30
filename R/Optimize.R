@@ -84,28 +84,36 @@ yesterday <- function(timestamp){
   
 }
 
-#' Function to convert lat and long to geometric coordinates
+#' Make an sf object out of lat / long tabular data
 #'
 #'
-#' @param cleaned tibble of GPS points 
-#' @return nested column of GPS data where each GPS data is a tibble including 
-#' information about the GPS point and the lat and long columns are replaced with a 
-#' single geometric coordinates column called "geometry"
-
-makeSf <- function(df) {
+#' @param df tibble of GPS points including columns `lat` and `lon`. These
+#'   should be in WGS84 coordinate system.
+#' @param crs The EPSG code for the desired projection. Defaults to 32612, UTM 
+#'   Zone 12N (meters), which is appropriate for many locations in Utah.
+#'   
+#' @return an sf point object where the lat and long columns are replaced with a 
+#'   single geometric coordinates column called "geometry"
+#'   
+#'   
+makeSf <- function(df, crs = 32612) {
   df %>%
     st_as_sf(coords = c("lon", "lat"), crs = 4327) %>%
-    st_transform(32612)
+    st_transform(crs)
 }
 
-#' Function to compute number of clusters
+#' Compute activity locations for one day
 #'
-#'
-#' @param cleaned tibble of GPS points and list of DBSCAN and entropy parameters
-#' @return nested column of clusters where each cluster is a tibble including 
-#' information about the cluster
-#' @details param[1,2,3,4] are eps, minpts, delta_t, and entr_t respectively
-
+#' @param df sf points object containing points and timepoints of GPS points for
+#'   a single individual in a single day.
+#' @param params a vector of parameters passed to the `gpsactivs::dbscan_te()`
+#'   function.
+#' @return An sf points object with labeled and ordered imputed activities,
+#'   including start and end times.
+#' @details param[1,2,3,4] are eps, minpts, delta_t, and entr_t respectively.
+#'   This function is a convenience wrapper to the `gpsactivs::dbscan_te()` 
+#'   function; more information can be found there.
+#' 
 makeClusters_1T <- function(df, params) {
   gpsactivs::dbscan_te(df, eps = params[1], minpts = params[2],
                        delta_t = params[3], entr_t = params[4])
