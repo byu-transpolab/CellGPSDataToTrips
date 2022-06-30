@@ -165,31 +165,39 @@ joinTables <- function(manual_table,cleaned_data) {
     as_tibble()
 }
 
-#' Function to calculate the error between algorithm and manual clusters
+#' Function to return the error between algorithm and manual clusters
 #'
 #'
 #' @param alg_manual_table target and initial set of params as defined in the optims 
 #' function
-#' @return RMSE error integer
+#' 
+#' @return Percent of gps 'points' that do not fall within both the algorithm buffer
+#' and the manual buffer (FALSE)
+#' 
+#' @details This function is what is called in the optimization functions.
+#' It returns the percentage of FALSE points as described in the 'number_of_points_
+#' in_cluster' function. The goal of the optimization functions is to minimize 
+#' the percent FALSE points between the number of points in the algorithm buffer
+#' and the number of points in the manual buffer.
+#' 
 calculateError <- function(params, cleaned_manual_table) {
-  test <- makeClusters(cleaned_manual_table, params) %>%
-    filter(algorithm != "no clusters found")
-  T2 <- test %>% mutate(diff = map2_dbl(manual, algorithm, clusterDistance))
+  clusters <- makeClusters(cleaned_manual_table, params) %>%
+    filter(algorithm != "no clusters found") 
+  
+  lapply(clusters, number_of_points_in_cluster(algorithm_centers = algorithm,
+                                                      manual_centers = manual,
+                                                      points = cleaned,
+                                                      buffer = 50))
+  
+  #'Create csv file of all the errors that were calculated through optimization 
+  #'process
+  
   write.table(as.character(sum(T2$diff)), 
               file = "sannbox_error.csv", 
               append = T, row.names = F)
   sum(T2$diff)
 }
 
-clusterDistance <- function(manual, algorithm){
-  if(nrow(manual)== 0 | nrow(algorithm) == 0) {
-    r <- 9000
-  } else {
-    algorithm <- algorithm %>% arrange(start)
-    r <- sum(st_distance(manual, algorithm, by_element = T)) 
-  }
-  r
-}
 
 #' Calculate percent of correctly classified points
 #' 
