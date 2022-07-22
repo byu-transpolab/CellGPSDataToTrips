@@ -180,18 +180,27 @@ joinTables <- function(manual_table,cleaned_data) {
 calculateError <- function(params, cleaned_manual_table) {
   clusters <- makeClusters(cleaned_manual_table, params) %>%
     filter(algorithm != "no clusters found") 
+  
+  raw_error <- lapply(seq_along(1:nrow(clusters)), function(i){
+    print(i)
+    number_of_points_in_cluster(
+      clusters$manual[[i]],
+      clusters$algorithm[[i]],
+      clusters$cleaned[[i]],
+      buffer = 50)
+  })
      
-  apply(X = clusters, FUN = number_of_points_in_cluster(df = clusters, manual_centers = manual,
-                                                    algorithm_centers = algorithm,
-                                                    points = cleaned, buffer = 50))
+  error <- sum(unlist(raw_error), na.rm = TRUE)
   
   #Create csv file of all the errors that were calculated through optimization 
-  #process
-  
-  write.table(as.character(sum(T2$diff)), 
-              file = "sannbox_error.csv", 
-              append = T, row.names = F)
-  sum(T2$diff)
+  #process, remember to change the name of the file for each kind of optimization
+  writeLines(stringr::str_c(params, error), 
+             con = "sannbox_error.csv", useBytes = FALSE,
+             sep = ",")
+  #write.table(as.character(error), 
+  #            file = "sannbox_error.csv", 
+  #            append = T, row.names = F)
+  error
 }
 
 
@@ -214,12 +223,17 @@ calculateError <- function(params, cleaned_manual_table) {
 #'   returns the percent of points that are classified differently based on the
 #'   the buffers in both methods.
 #'   
-number_of_points_in_cluster <- function(df, manual_centers, algorithm_centers, 
+number_of_points_in_cluster <- function(manual_centers, algorithm_centers, 
                                         points, buffer = 50){
-
+  
+  if(nrow(algorithm_centers) < 1){
+    return(1) # there are no algorithm-defined clusters, so by definition nothing matches
+  }
+  
   # create buffers around activity points
   manual_buffer <- st_buffer(manual_centers, buffer) %>% st_union()
   algorithm_buffer <- st_buffer(algorithm_centers, buffer) %>% st_union()
+
   
   # determine whether the points are inside each set of buffers
   agree <- points %>% 
@@ -233,16 +247,24 @@ number_of_points_in_cluster <- function(df, manual_centers, algorithm_centers,
   
   # calculate percent of FALSE agreement
   stat <- table(agree$agree)
+  
+  # if there are no FALSE occurances, return FALSE percentage as 0 instead of
+  # the default percent TRUE = 1
+  if(stat[1] == nrow(agree)){
+    return(0)
+  }
+  
   stat[1] / sum(stat)
+  
   
   # map (for debugging)
   # pal <- colorFactor("Dark2", agree$agree)
-  # leaflet() %>%
-  #  addProviderTiles(providers$CartoDB) %>%
-  #  addPolygons(data = manual_buffer %>% st_transform(4326), color = "red")  %>%
-  #  addPolygons(data = algorithm_buffer%>% st_transform(4326), color = "green")  %>%
-  #  addCircles(data = agree %>% st_transform(4326), color = ~pal(agree))
-  
+  #leaflet() %>%
+  # addProviderTiles(providers$CartoDB) %>%
+  # addPolygons(data = manual_buffer %>% st_transform(4326), color = "red")  %>%
+  # addPolygons(data = algorithm_buffer%>% st_transform(4326), color = "green")  %>%
+  # addCircles(data = agree %>% st_transform(4326), color = ~pal(agree))
+
 }
 
 #' Function to minimize the RMSE between algorithm clusters and manual clusters
