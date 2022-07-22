@@ -126,7 +126,7 @@ makeClusters <- function(cleaned_manual_table, params) {
               append = T, quote = F, row.names = F)
   cleaned_manual_table %>%
     ungroup() %>%
-    mutate(algorithm = purrr::map(sf, makeClusters_1T, 
+    mutate(algorithm = purrr::map(cleaned, makeClusters_1T, 
                            params = params))
 }
 
@@ -156,14 +156,11 @@ makeManualTable <- function(folder){
 #' @param manual_table and algorithm_table targets
 #' @return alg_manual_table target which includes the id, date
 #' and the nested clusters column from both the manual table and algorithm table
-
-# Remember to also group by id once I get manual_clusters that match what is in
-# the data folder
-
 joinTables <- function(manual_table,cleaned_data) {
   inner_join(manual_table, cleaned_data, by = c("date", "id")) %>%
     as_tibble()
 }
+
 
 #' Function to return the error between algorithm and manual clusters
 #'
@@ -183,14 +180,13 @@ joinTables <- function(manual_table,cleaned_data) {
 calculateError <- function(params, cleaned_manual_table) {
   clusters <- makeClusters(cleaned_manual_table, params) %>%
     filter(algorithm != "no clusters found") 
+     
+  apply(X = clusters, FUN = number_of_points_in_cluster(df = clusters, manual_centers = manual,
+                                                    algorithm_centers = algorithm,
+                                                    points = cleaned, buffer = 50))
   
-  lapply(clusters, number_of_points_in_cluster(algorithm_centers = algorithm,
-                                                      manual_centers = manual,
-                                                      points = cleaned,
-                                                      buffer = 50))
-  
-  #'Create csv file of all the errors that were calculated through optimization 
-  #'process
+  #Create csv file of all the errors that were calculated through optimization 
+  #process
   
   write.table(as.character(sum(T2$diff)), 
               file = "sannbox_error.csv", 
@@ -218,9 +214,9 @@ calculateError <- function(params, cleaned_manual_table) {
 #'   returns the percent of points that are classified differently based on the
 #'   the buffers in both methods.
 #'   
-number_of_points_in_cluster <- function(manual_centers, algorithm_centers, points,
-                                        buffer = 50){
-  
+number_of_points_in_cluster <- function(df, manual_centers, algorithm_centers, 
+                                        points, buffer = 50){
+
   # create buffers around activity points
   manual_buffer <- st_buffer(manual_centers, buffer) %>% st_union()
   algorithm_buffer <- st_buffer(algorithm_centers, buffer) %>% st_union()
