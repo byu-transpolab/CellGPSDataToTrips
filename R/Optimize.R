@@ -121,9 +121,6 @@ makeClusters_1T <- function(df, params) {
 
 makeClusters <- function(cleaned_manual_table, params) {
   print(params)
-  write.table(params, 
-              file = "sannbox_params.csv", 
-              append = T, quote = F, row.names = F)
   cleaned_manual_table %>%
     ungroup() %>%
     mutate(algorithm = purrr::map(cleaned, makeClusters_1T, 
@@ -192,14 +189,14 @@ calculateError <- function(params, cleaned_manual_table) {
      
   error <- sum(unlist(raw_error), na.rm = TRUE)
   
-  #Create csv file of all the errors that were calculated through optimization 
-  #process, remember to change the name of the file for each kind of optimization
-  writeLines(stringr::str_c(params, error), 
-             con = "sannbox_error.csv", useBytes = FALSE,
-             sep = ",")
-  #write.table(as.character(error), 
-  #            file = "sannbox_error.csv", 
-  #            append = T, row.names = F)
+  #' Create csv file of all the tested parameters and the associated error
+  #' that were calculated through optimization process, 
+  #' remember to change the name of the file for each kind of optimization
+  
+  write.table(cbind(params, error), 
+              file="sannbox_error.csv",row.names=F,
+              col.names=c('params','error'))
+  
   error
 }
 
