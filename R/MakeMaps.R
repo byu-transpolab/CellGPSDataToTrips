@@ -22,14 +22,14 @@ getRandomDates <- function(cleaned_data) {
 #' @details makes a map for each random day for each  of the 10 random IDs
 makeAllMaps <- function(cleaned_data){
   myDays <- getRandomDates(cleaned_data)
-  dir.create("maps", showWarnings = FALSE)
+  dir.create("maps20220826", showWarnings = FALSE)
   
   future_lapply(seq_along(1:nrow(myDays)), function(i){
     st_write(
       myDays$cleaned[[i]] %>%
         mutate(time = as.numeric(timestamp)) %>%
         st_transform(4326),  
-      str_c( "maps/", myDays$id[i], "_", myDays$date[i], ".geojson", sep = ""),
+      str_c( "maps20220826/", myDays$date[i], "_", myDays$id[i], ".geojson", sep = ""),
       delete_dsn = TRUE, delete_layer = TRUE,
     )
   }, future.seed = NULL)
