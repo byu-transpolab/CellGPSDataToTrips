@@ -13,7 +13,7 @@ cleanData <- function(folder, nfiles = NULL) {
   if(is.null(nfiles)){ nfiles <- length(files_in_folder) }
   
   # loop through the files in the folder
-  # this is an embarassingly parallel step implemented with the future library
+  # this is an embarrassingly parallel step implemented with the future library
   caps <- future_lapply(sample(files_in_folder, nfiles), function(x){
     
     # read CSV file and rename / simplify table
@@ -22,7 +22,7 @@ cleanData <- function(folder, nfiles = NULL) {
         id = userId,
         lat, lon,
         # Separate Date and Time columns
-        timestamp = lubridate::as_datetime(timestamp),
+        timestamp = lubridate::as_datetime(time),
         date = lubridate::date(timestamp),   
         minute = str_c(
           str_pad(lubridate::hour(timestamp), width = 2, pad = "0"),
@@ -35,8 +35,8 @@ cleanData <- function(folder, nfiles = NULL) {
       # sample 10 rows in that group, or as many rows as exist
       slice_sample(n = 10, replace = FALSE ) 
     
-  }, future.seed = NULL) 
-    
+  }, future.seed = 42) 
+   
   caps %>%
     # combine all days for all participants into a single tibble
     dplyr::bind_rows() %>%
@@ -142,9 +142,7 @@ makeManualTable <- function(folder){
   
   tibble(manual = manualList,
          name_of_file = file_path_sans_ext(files)) %>% 
-    separate(name_of_file, c("chardate", "id"), sep = c("_")) %>%
-    mutate(date = as.Date(chardate)) %>%
-    select(-c("chardate"))
+    separate(name_of_file, c("date", "id"), sep = c("_")) 
 }
 
 #' Function to join the manual_table with the algorithm_table by ID and date
@@ -154,8 +152,9 @@ makeManualTable <- function(folder){
 #' @return alg_manual_table target which includes the id, date
 #' and the nested clusters column from both the manual table and algorithm table
 joinTables <- function(manual_table,cleaned_data) {
-  inner_join(manual_table, cleaned_data, by = c("date", "id")) %>%
-    as_tibble()
+  cleaned_data$date <- as.character(cleaned_data$date)
+  inner_join(manual_table, cleaned_data, by = c("date","id")) %>%
+    as_tibble() 
 }
 
 
@@ -179,7 +178,7 @@ calculateError <- function(params, cleaned_manual_table) {
     filter(algorithm != "no clusters found") 
   
   raw_error <- lapply(seq_along(1:nrow(clusters)), function(i){
-    print(i)
+    # print(i)
     number_of_points_in_cluster(
       clusters$manual[[i]],
       clusters$algorithm[[i]],
@@ -195,7 +194,8 @@ calculateError <- function(params, cleaned_manual_table) {
   
   write.table(cbind(params, error), 
               file="sannbox_error.csv",row.names=F,
-              col.names=c('params','error'))
+              col.names=c('params','error'),
+              append = TRUE)
   
   error
 }
@@ -275,10 +275,11 @@ number_of_points_in_cluster <- function(manual_centers, algorithm_centers,
 optimize <- function(cleaned_manual_table, params = c(25,60,320,2)) {
   sannbox(par = params, fn = calculateError, cleaned_manual_table = cleaned_manual_table,
         control = list(upper = c(100, 300, 24 * 3600, 4), lower = c(10,3,300, 1),
-                       maxit = 55000))
+                       maxit = 1500))
 }
   
 optimize2 <- function(cleaned_manual_table, params = c(25,60,320,2)) {
   optim(par = params, fn = calculateError, cleaned_manual_table = cleaned_manual_table,
-        method = "L-BFGS-B", upper = c(100, 300, 24 * 3600, 4), lower = c(10,3,300, 1))
+        method = "L-BFGS-B", upper = c(100, 300, 24 * 3600, 4), lower = c(10,3,300, 1),
+        maxit = 1500)
 }
