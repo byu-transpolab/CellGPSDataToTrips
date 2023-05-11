@@ -193,7 +193,7 @@ calculateError <- function(params, cleaned_manual_table) {
   #' remember to change the name of the file for each kind of optimization
   
   write.table(cbind(params, error), 
-              file="sannbox_error.csv",row.names=F,
+              file="optim_scaled_20220920_2.csv",row.names=F,
               col.names=c('params','error'),
               append = TRUE)
   
@@ -254,13 +254,14 @@ number_of_points_in_cluster <- function(manual_centers, algorithm_centers,
   stat[1] / sum(stat)
   
   
-  # map (for debugging)
-  # pal <- colorFactor("Dark2", agree$agree)
+   # map (for debugging)
+   #pal <- colorFactor("Dark2", agree$agree)
   #leaflet() %>%
-  # addProviderTiles(providers$CartoDB) %>%
-  # addPolygons(data = manual_buffer %>% st_transform(4326), color = "red")  %>%
-  # addPolygons(data = algorithm_buffer%>% st_transform(4326), color = "green")  %>%
-  # addCircles(data = agree %>% st_transform(4326), color = ~pal(agree))
+   #addProviderTiles(providers$CartoDB) %>%
+   #addPolygons(data = manual_buffer %>% st_transform(4326), color = "red")  %>%
+   #addPolygons(data = algorithm_buffer%>% st_transform(4326), color = "green")  %>%
+   #addCircles(data = clusters$cleaned[[3]]%>% st_transform(4326), color = "black")
+   #addCircles(data = agree %>% st_transform(4326), color = ~pal(agree))
 
 }
 
@@ -270,16 +271,16 @@ number_of_points_in_cluster <- function(manual_centers, algorithm_centers,
 #'
 #' @param initial vector for params and the calculateError function to be minimized
 #' @return vector of optimized parameters 
-#' @details param[1,2,3,4] are eps, minpts, delta_t, and entr_t respectively
+#' @details param[1,2,3,4] are eps, minpts,delta_t, and entr_t respectively
 
-optimize <- function(cleaned_manual_table, params = c(25,60,320,2)) {
+optimize <- function(cleaned_manual_table, params = c(10,3,36000,1.3)) {
   sannbox(par = params, fn = calculateError, cleaned_manual_table = cleaned_manual_table,
         control = list(upper = c(100, 300, 24 * 3600, 4), lower = c(10,3,300, 1),
-                       maxit = 1500))
+                       maxit = 100, parscale = c(25,75,21600,1)))
 }
   
-optimize2 <- function(cleaned_manual_table, params = c(25,60,320,2)) {
+optimize2 <- function(cleaned_manual_table, params = c(10,3,36000,1.3)) {
   optim(par = params, fn = calculateError, cleaned_manual_table = cleaned_manual_table,
         method = "L-BFGS-B", upper = c(100, 300, 24 * 3600, 4), lower = c(10,3,300, 1),
-        maxit = 1500)
+        control = list(maxit = 100, parscale = c(25,75,21600,1)))
 }
